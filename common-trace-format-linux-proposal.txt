@@ -1,5 +1,5 @@
 
-RFC: Common Trace Format Proposal for Linux (v1.5)
+RFC: Common Trace Format Proposal for Linux (pre-v1.6)
 
 Mathieu Desnoyers, EfficiOS Inc.
 
@@ -181,7 +181,7 @@ Example of type inheritance (creation of a concrete type uint32_t):
 
 type uint32_t {
   parent = integer;
-  size = 8;
+  size = 32;
   signed = false;
   align = 32;
 };
