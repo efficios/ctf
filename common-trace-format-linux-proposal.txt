@@ -1,5 +1,5 @@
 
-RFC: Common Trace Format Proposal for Linux (pre-v1.6)
+RFC: Common Trace Format Proposal for Linux (v1.6)
 
 Mathieu Desnoyers, EfficiOS Inc.
 
@@ -84,14 +84,11 @@ A basic type is a scalar type, as described in this section.
 
 4.1.1 Type inheritance
 
-Type specifications can be inherited to allow deriving concrete types from an
-abstract type. For example, see the uint32_t type derived from the "integer"
-abstract type below ("Integers" section). Concrete types have a precise binary
-representation in the trace. Abstract types have methods to read and write these
-types, but must be derived into a concrete type to be usable in an event field.
-
-Concrete types inherit from abstract types. Abstract types can inherit from
-other abstract types.
+Type specifications can be inherited to allow deriving types from a
+type class. For example, see the uint32_t named type derived from the "integer"
+type class below ("Integers" section). Types have a precise binary
+representation in the trace. A type class has methods to read and write these
+types, but must be derived into a type to be usable in an event field.
 
 4.1.2 Alignment
 
@@ -170,44 +167,48 @@ added (see 4.1.6 GNU/C bitfields) to follow the GCC layout if needed.
 
 Metadata representation:
 
-  abstract_type integer {
+  integer {
     signed = true OR false;                     /* default false */
     byte_order = native OR network OR be OR le; /* default native */
     size = value;                               /* value in bits, no default */
     align = value;                              /* value in bits */
   };
 
-Example of type inheritance (creation of a concrete type uint32_t):
+Example of type inheritance (creation of a uint32_t named type):
 
-type uint32_t {
-  parent = integer;
+typedef integer {
   size = 32;
   signed = false;
   align = 32;
-};
+} uint32_t;
 
-Definition of a 5-bit signed bitfield:
+Definition of a named 5-bit signed bitfield:
 
-type int5_t {
-  parent = integer;
+typedef integer {
   size = 5;
   signed = true;
   align = 1;
-};
+} int5_t;
 
 4.1.6 GNU/C bitfields
 
 The GNU/C bitfields follow closely the integer representation, with a
 particularity on alignment: if a bitfield cannot fit in the current unit, the
-unit is padded and the bitfield starts at the following unit. We therefore need
-to express the extra "unit size" information.
+unit is padded and the bitfield starts at the following unit. The unit size is
+defined by the size of the type "unit_type".
 
-Metadata representation:
+Metadata representation. Either:
 
-abstract_type gcc_bitfield {
-  parent = integer;
-  unit_size = value;
+gcc_bitfield {
+  unit_type = integer {
+    ...
+  };
+  size = value;
 };
+
+Or bitfield within structures as specified by the C standard
+
+  unit_type name:size:
 
 As an example, the following structure declared in C compiled by GCC:
 
@@ -216,28 +217,21 @@ struct example {
   short b:5;
 };
 
-Would correspond to the following structure, aligned on the largest element
-(short). The second bitfield would be aligned on the next unit boundary, because
-it would not fit in the current unit.
+is equivalent to the following structure declaration, aligned on the largest
+element (short). The second bitfield would be aligned on the next unit boundary,
+because it would not fit in the current unit. The two declarations (C
+declaration above or CTF declaration with "type gcc_bitfield") are strictly
+equivalent.
 
-type struct_example {
-  parent = struct;
-  fields = {
-    type {
-      parent = gcc_bitfield;
-      unit_size = 16;				/* sizeof(short) */
-      size = 12;
-      signed = true;
-      align = 1;
-    } a;
-    type {
-      parent = gcc_bitfield;
-      unit_size = 16;				/* sizeof(short) */
-      size = 5;
-      signed = true;
-      align = 1;
-    } b;
-  };
+struct example {
+  gcc_bitfield {
+    unit_type = short;
+    size = 12;
+  } a;
+  gcc_bitfield {
+    unit_type = short;
+    size = 5;
+  } b;
 };
 
 4.1.7 Floating point
@@ -263,7 +257,7 @@ in bits. Some requirements are imposed on the floating point values:
 
 Metadata representation:
 
-abstract_type floating_point {
+floating_point {
    exp_dig = value;
    mant_dig = value;
    byte_order = native OR network OR be OR le;
@@ -271,11 +265,11 @@ abstract_type floating_point {
 
 Example of type inheritance:
 
-type float {
+typedef floating_point {
   exp_dig = 8;         /* sizeof(float) * CHAR_BIT - FLT_MANT_DIG */
   mant_dig = 24;       /* FLT_MANT_DIG */
   byte_order = native;
-};
+} float;
 
 TODO: define NaN, +inf, -inf behavior.
 
@@ -287,24 +281,36 @@ by the metadata. The enumeration mapping table is detailed in the enumeration
 description within the metadata. The mapping table maps inclusive value ranges
 (or single values) to strings. Instead of being limited to simple
 "value -> string" mappings, these enumerations map
-"[ start_value .. end_value ] -> string", which map inclusive ranges of
+"[ start_value ... end_value ] -> string", which map inclusive ranges of
 values to strings.  An enumeration from the C language can be represented in
 this format by having the same start_value and end_value for each element, which
 is in fact a range of size 1. This single-value range is supported without
-repeating the start and end values with the { value, string } declaration.
+repeating the start and end values with the value = string declaration. If the
+<integer_type> is omitted, the type chosen by the C compiler to hold the
+enumeration is used. The <integer_type> specifier can only be omitted for
+enumerations containing only simple "value -> string" mappings (compatible with
+C).
 
-abstract_type enum {
-  parent = integer;
-  map = {
-    { { start_value, end_value }, string },
-    { { start_value, end_value }, string },
-    { { start_value, end_value }, string },
-    { value, string },
-    { value, string },
-    ...
-  };
+enum <integer_type> name {
+  string              = start_value1 ... end_value1,
+  "other string"      = start_value2 ... end_value2,
+  yet_another_string,	/* will be assigned to end_value2 + 1 */
+  "some other string" = value,
+  ...
 };
 
+If the values are omitted, the enumeration starts at 0 and increment of 1 for
+each entry:
+
+enum {
+  ZERO,
+  ONE,
+  TWO,
+  TEN = 10,
+  ELEVEN,
+};
+
+Overlapping ranges within a single enumeration are implementation defined.
 
 4.2 Compound types
 
@@ -313,33 +319,33 @@ abstract_type enum {
 Structures are aligned on the largest alignment required by basic types
 contained within the structure. (This follows the ISO/C standard for structures)
 
-Metadata representation:
+Metadata representation of a named structure:
 
-abstract_type struct {
-  fields = {
-    field_type field_name;
-    field_type field_name;
-    ...
-  };
-}  
+struct name {
+  field_type field_name;
+  field_type field_name;
+  ...
+}; 
 
 Example:
 
-type struct_example {
-  parent = struct;
-  fields = {
-    type {                       /* Nameless type */
-      parent = integer;
-      size = 16;
-      signed = true;
-      align = 16;
-    } first_field_name;
-    uint64_t second_field_name;  /* Named type declared in the metadata */
-  };
+struct example {
+  integer {                       /* Nameless type */
+    size = 16;
+    signed = true;
+    align = 16;
+  } first_field_name;
+  uint64_t second_field_name;  /* Named type declared in the metadata */
 };
 
 The fields are placed in a sequence next to each other. They each possess a
 field name, which is a unique identifier within the structure.
+
+A nameless structure can be declared as a field type:
+
+struct {
+  ...
+} field_name;
 
 4.2.2 Arrays
 
@@ -348,20 +354,35 @@ the metadata. They contain an array of "inner type" elements, which can refer to
 any type not containing the type of the array being declared (no circular
 dependency). The length is the number of elements in an array.
 
-Metadata representation:
+Metadata representation of a named array, either:
 
-abstract_type array {
+typedef array {
   length = value;
   elem_type = type;
-};
+} name;
+
+or:
+
+typedef elem_type name[length];
 
 E.g.:
 
-type example_array {
-  parent = array;
+typedef array {
   length = 10;
   elem_type = uint32_t;
-};
+} example;
+
+A nameless array can be declared as a field type, e.g.:
+
+array {
+  length = 5;
+  elem_type = uint8_t;
+} field_name;
+
+or
+
+uint8_t field_name[10];
+
 
 4.2.3 Sequences
 
@@ -369,12 +390,29 @@ Sequences are dynamically-sized arrays. They start with an integer that specify
 the length of the sequence, followed by an array of "inner type" elements.
 The length is the number of elements in the sequence.
 
-abstract_type sequence {
-  length_type = type;	/* Inheriting from integer */
-  elem_type = type;
-};
+Metadata representation for a named sequence, either:
 
-The integer type follows the integer types specifications, and the sequence
+typedef sequence {
+  length_type = type;	/* integer class */
+  elem_type = type;
+} name;
+
+or:
+
+typedef elem_type name[length_type];
+
+A nameless sequence can be declared as a field type, e.g.:
+
+sequence {
+  length_type = int;
+  elem_type = long;
+} field_name;
+
+or
+
+long field_name[int];
+
+The length type follows the integer types specifications, and the sequence
 elements follow the "array" specifications.
 
 4.2.4 Strings
@@ -383,10 +421,15 @@ Strings are an array of bytes of variable size and are terminated by a '\0'
 "NULL" character.  Their encoding is described in the metadata. In absence of
 encoding attribute information, the default encoding is UTF-8.
 
-abstract_type string {
-  encoding = UTF8 OR ASCII;
-};
+Metadata representation of a named string type:
 
+typedef string {
+  encoding = UTF8 OR ASCII;
+} name;
+
+A nameless string type can be declared as a field type:
+
+string field_name;	/* Use default UTF8 encoding */
 
 5. Event Packet Header
 
@@ -453,17 +496,11 @@ Metadata-defined layout (event packet context):
 
 5.1 Event Packet Header Fixed Layout Description
 
-type event_packet_header {
-  parent = struct;
-  fields = {
-    uint32_t magic;
-    type {
-      parent = array; 
-      length = 16; 
-      elem_type = uint8_t;  
-    } trace_uuid;
+struct event_packet_header {
+  uint32_t magic;
+  uint8_t  trace_uuid[16];
   uint32_t stream_id;
-}
+};
 
 5.2 Event Packet Context Description
 
@@ -473,7 +510,7 @@ in the metadata. All these fields are optional except for "content_size" and
 
 An example event packet context type:
 
-type event_packet_context {
+struct event_packet_context {
   uint64_t timestamp_begin;
   uint64_t timestamp_end;
   uint32_t checksum;
@@ -527,16 +564,13 @@ Types uintX_t represent an X-bit unsigned integer.
   - Fixed size: 32 bits.
   - Native architecture byte ordering.
 
-type event_header_1 {
-  parent = struct;
-  fields = {
-    uint5_t id;		/*
+struct event_header_1 {
+  uint5_t id;		/*
 			 * id: range: 0 - 30.
 			 * id 31 is reserved to indicate a following
 			 * extended header.
 			 */
-    uint27_t timestamp;
-  };
+  uint27_t timestamp;
 };
 
 The end of a type 1 header is aligned on a 32-bit boundary (or packed).
@@ -548,18 +582,12 @@ The end of a type 1 header is aligned on a 32-bit boundary (or packed).
     realign.
   - Variable size (depends on the number of fields per event).
   - Native architecture byte ordering.
+  - NR_FIELDS is the number of fields within the event.
 
-type event_header_1_ext {
-  parent = struct;
-  fields = {
-    uint32_t id;		/* 32-bit event IDs */
-    uint64_t timestamp;		/* 64-bit timestamps */
-    type {
-      parent = array;
-      length = NR_FIELDS;	/* Number of fields within the event */
-      elem_type = uint1_t;	/* 1-bit bitfield */
-    } missing_fields;
-  };
+struct event_header_1_ext {
+  uint32_t id;				/* 32-bit event IDs */
+  uint64_t timestamp;			/* 64-bit timestamps */
+  uint1_t missing_fields[NR_FIELDS];	/* missing event fields bitmap */
 };
 
 
@@ -570,16 +598,13 @@ type event_header_1_ext {
   - Fixed size: 48 bits.
   - Native architecture byte ordering.
 
-type event_header_2 {
-  parent = struct;
-  fields = {
-    uint32_t timestamp;
-    uint16_t id;	/*
+struct event_header_2 {
+  uint32_t timestamp;
+  uint16_t id;		/*
 			 * id: range: 0 - 65534.
 			 * id 65535 is reserved to indicate a following
 			 * extended header.
 			 */
-  };
 };
 
 The end of a type 2 header is aligned on a 16-bit boundary (or 8-bit if
@@ -593,18 +618,12 @@ byte-packed).
     byte-packed).
   - Variable size (depends on the number of fields per event).
   - Native architecture byte ordering.
+  - NR_FIELDS is the number of fields within the event.
 
-type event_header_2_ext {
-  parent = struct;
-  fields = {
-    uint64_t timestamp;		/* 64-bit timestamps */ 
-    uint32_t id;		/* 32-bit event IDs */
-    type {
-      parent = array;
-      length = NR_FIELDS;	/* Number of fields within the event */
-      elem_type = uint1_t;	/* 1-bit bitfield */
-    } missing_fields;
-  };
+struct event_header_2_ext {
+  uint64_t timestamp;			/* 64-bit timestamps */ 
+  uint32_t id;				/* 32-bit event IDs */
+  uint1_t missing_fields[NR_FIELDS];	/* missing event fields bitmap */
 };
 
 
@@ -620,12 +639,9 @@ These are declared within the stream declaration within the metadata.
 
 An example event context type:
 
-      type event_context {
-        parent = struct;
-        fields = {
-          uint pid;
-          uint16_t payload_size;
-        };
+      struct event_context {
+        uint pid;
+        uint16_t payload_size;
       };
 
 
@@ -684,10 +700,14 @@ stream {
      * on a per-event basis.
      */
     header_type_ext = event_header_1_ext OR event_header_2_ext;
-    context_type = type inheriting from "struct" abstract type;
+    context_type = struct {
+      ...
+    };
   };
   packet {
-    context_type = type inheriting from "struct" abstract type;
+    context_type = struct {
+      ...
+    };
   };
 };
 
@@ -695,32 +715,44 @@ event {
   name = eventname;
   id = value;			/* Numeric identifier within the stream */
   stream = stream_id;
-  fields = type inheriting from "struct" abstract type;
+  fields = struct {
+    ...
+  };
 };
 
 /* More detail on types in section 4. Types */
 
 /* Named types */
-type {
-  name = typename;
+typedef some existing type new_type;
+
+typedef type_class {
+  ...
+} new_type;
+
+struct name {
+  ...
+};
+
+enum name {
   ...
 };
 
 /* Unnamed types, contained within compound type fields or type assignments. */
-type {
+struct {
   ...
 };
 
+enum {
+  ...
+};
 
-Structure types used for fields and context_type implicitly inherit from
-"struct" and require no "type" identifier before the braces. E.g.:
+array {
+  ...
+};
 
-  fields = {
-    typeA name1;
-    typeB name2;
-    ...
-  };
-
+sequence {
+  ...
+};
 
 A. Helper macros
 
