@@ -1,5 +1,5 @@
 
-RFC: Common Trace Format Proposal (v1.6)
+RFC: Common Trace Format (CTF) Proposal (v1.6)
 
 Mathieu Desnoyers, EfficiOS Inc.
 
