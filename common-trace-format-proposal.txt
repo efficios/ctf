@@ -717,7 +717,7 @@ stream {
 };
 
 event {
-  name = eventname;
+  name = event_name;
   id = value;			/* Numeric identifier within the stream */
   stream = stream_id;
   fields = struct {
@@ -727,18 +727,34 @@ event {
 
 /* More detail on types in section 4. Types */
 
-/* Named types */
-typedef some existing type new_type;
+/*
+ * Named types:
+ *
+ * A named type can only have a prefix and postfix if it aliases a CTF basic
+ * type. A type name aliasing another type name cannot have prefix nor postfix,
+ * but the type aliased can have a prefix and/or postfix.
+ */
+
+typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
+/* e.g.: typedef struct example new_type_name[10]; */
 
 typedef type_class {
   ...
-} new_type;
+} new_type_prefix new_type new_type_postfix;
+/*
+ * e.g.: 
+ * typedef integer {
+ *   size = 32;
+ *   align = 32;
+ *   signed = false;
+ * } struct page *;
+ */
 
 struct name {
   ...
 };
 
-enum name {
+enum <integer_type> name {
   ...
 };
 
@@ -747,7 +763,7 @@ struct {
   ...
 };
 
-enum {
+enum <integer_type> {
   ...
 };
 
