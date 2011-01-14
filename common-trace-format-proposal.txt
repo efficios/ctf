@@ -1,5 +1,5 @@
 
-RFC: Common Trace Format (CTF) Proposal (v1.6)
+RFC: Common Trace Format (CTF) Proposal (pre-v1.7)
 
 Mathieu Desnoyers, EfficiOS Inc.
 
@@ -268,13 +268,12 @@ description within the metadata. The mapping table maps inclusive value ranges
 values to strings.  An enumeration from the C language can be represented in
 this format by having the same start_value and end_value for each element, which
 is in fact a range of size 1. This single-value range is supported without
-repeating the start and end values with the value = string declaration. If the
-<integer_type> is omitted, the type chosen by the C compiler to hold the
-enumeration is used. The <integer_type> specifier can only be omitted for
-enumerations containing only simple "value -> string" mappings (compatible with
-C).
+repeating the start and end values with the value = string declaration.
 
-enum <integer_type> name {
+If a numeric value is encountered between < >, it represents the integer type
+size used to hold the enumeration, in bits.
+
+enum <integer_type OR size> name {
   string              = start_value1 ... end_value1,
   "other string"      = start_value2 ... end_value2,
   yet_another_string,	/* will be assigned to end_value2 + 1 */
@@ -285,7 +284,7 @@ enum <integer_type> name {
 If the values are omitted, the enumeration starts at 0 and increment of 1 for
 each entry:
 
-enum name {
+enum <32> name {
   ZERO,
   ONE,
   TWO,
@@ -705,7 +704,7 @@ struct name {
   ...
 };
 
-enum <integer_type> name {
+enum <integer_type or size> name {
   ...
 };
 
@@ -716,7 +715,7 @@ struct {
   ...
 }
 
-enum <integer_type> {
+enum <integer_type or size> {
   ...
 }
 
