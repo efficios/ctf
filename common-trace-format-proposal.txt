@@ -177,7 +177,7 @@ Metadata representation:
     byte_order = native OR network OR be OR le; /* default native */
     size = value;                               /* value in bits, no default */
     align = value;                              /* value in bits */
-  };
+  }
 
 Example of type inheritance (creation of a uint32_t named type):
 
@@ -202,16 +202,7 @@ particularity on alignment: if a bitfield cannot fit in the current unit, the
 unit is padded and the bitfield starts at the following unit. The unit size is
 defined by the size of the type "unit_type".
 
-Metadata representation. Either:
-
-gcc_bitfield {
-  unit_type = integer {
-    ...
-  };
-  size = value;
-};
-
-Or bitfield within structures as specified by the C standard
+Metadata representation:
 
   unit_type name:size:
 
@@ -222,22 +213,9 @@ struct example {
   short b:5;
 };
 
-is equivalent to the following structure declaration, aligned on the largest
-element (short). The second bitfield would be aligned on the next unit boundary,
-because it would not fit in the current unit. The two declarations (C
-declaration above or CTF declaration with "type gcc_bitfield") are strictly
-equivalent.
-
-struct example {
-  gcc_bitfield {
-    unit_type = short;
-    size = 12;
-  } a;
-  gcc_bitfield {
-    unit_type = short;
-    size = 5;
-  } b;
-};
+The example structure is aligned on the largest element (short). The second
+bitfield would be aligned on the next unit boundary, because it would not fit in
+the current unit.
 
 4.1.7 Floating point
 
@@ -266,7 +244,7 @@ floating_point {
    exp_dig = value;
    mant_dig = value;
    byte_order = native OR network OR be OR le;
-};
+}
 
 Example of type inheritance:
 
@@ -307,7 +285,7 @@ enum <integer_type> name {
 If the values are omitted, the enumeration starts at 0 and increment of 1 for
 each entry:
 
-enum {
+enum name {
   ZERO,
   ONE,
   TWO,
@@ -316,6 +294,12 @@ enum {
 };
 
 Overlapping ranges within a single enumeration are implementation defined.
+
+A nameless enumeration can be declared as a field type or as part of a typedef:
+
+enum <integer_type> {
+  ...
+}
 
 4.2 Compound types
 
@@ -346,11 +330,11 @@ struct example {
 The fields are placed in a sequence next to each other. They each possess a
 field name, which is a unique identifier within the structure.
 
-A nameless structure can be declared as a field type:
+A nameless structure can be declared as a field type or as part of a typedef:
 
 struct {
   ...
-} field_name;
+}
 
 4.2.2 Arrays
 
@@ -359,34 +343,13 @@ the metadata. They contain an array of "inner type" elements, which can refer to
 any type not containing the type of the array being declared (no circular
 dependency). The length is the number of elements in an array.
 
-Metadata representation of a named array, either:
-
-typedef array {
-  length = value;
-  elem_type = type;
-} name;
-
-or:
+Metadata representation of a named array:
 
 typedef elem_type name[length];
 
-E.g.:
+A nameless array can be declared as a field type within a structure, e.g.:
 
-typedef array {
-  length = 10;
-  elem_type = uint32_t;
-} example;
-
-A nameless array can be declared as a field type, e.g.:
-
-array {
-  length = 5;
-  elem_type = uint8_t;
-} field_name;
-
-or
-
-uint8_t field_name[10];
+  uint8_t field_name[10];
 
 
 4.2.3 Sequences
@@ -395,25 +358,11 @@ Sequences are dynamically-sized arrays. They start with an integer that specify
 the length of the sequence, followed by an array of "inner type" elements.
 The length is the number of elements in the sequence.
 
-Metadata representation for a named sequence, either:
-
-typedef sequence {
-  length_type = type;	/* integer class */
-  elem_type = type;
-} name;
-
-or:
+Metadata representation for a named sequence:
 
 typedef elem_type name[length_type];
 
 A nameless sequence can be declared as a field type, e.g.:
-
-sequence {
-  length_type = int;
-  elem_type = long;
-} field_name;
-
-or
 
 long field_name[int];
 
@@ -736,11 +685,13 @@ event {
  */
 
 typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
+
 /* e.g.: typedef struct example new_type_name[10]; */
 
 typedef type_class {
   ...
 } new_type_prefix new_type new_type_postfix;
+
 /*
  * e.g.: 
  * typedef integer {
@@ -758,22 +709,44 @@ enum <integer_type> name {
   ...
 };
 
-/* Unnamed types, contained within compound type fields or type assignments. */
+
+/* Unnamed types, contained within compound type fields or typedef. */
+
 struct {
   ...
-};
+}
 
 enum <integer_type> {
   ...
-};
+}
 
-array {
-  ...
-};
+typedef type new_type[length];
 
-sequence {
+struct {
+  type field_name[length];
+}
+
+typedef type new_type[length_type];
+
+struct {
+  type field_name[length_type];
+}
+
+integer {
   ...
-};
+}
+
+floating_point {
+  ...
+}
+
+struct {
+  integer_type field_name:size;		/* GNU/C bitfield */
+}
+
+struct {
+  string field_name;
+}
 
 A. Helper macros
 
