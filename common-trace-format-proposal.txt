@@ -335,7 +335,123 @@ struct {
   ...
 }
 
-4.2.2 Arrays
+4.2.2 Variants (Discriminated Unions)
+
+A CTF variant is a selection between different types. A CTF variant must always
+be defined within the scope of a structure or within fields contained within a
+structure (defined recursively). A "tag" enumeration field must appear in either
+the same lexical scope or an uppermost scope, prior to the variant field (in
+field declaration order). The type selection is indicated by the mapping from
+the enumeration value to the string used as variant type selector. The field to
+use as tag is specified by the "tag_field", specified between "< >" after the
+"variant" keyword for unnamed variants, and after "variant name" for named
+variants.
+
+The alignment of the variant is the alignment of the type as selected by the tag
+value for the specific instance of the variant. The alignment of the type
+containing the variant is independent of the variant alignment.  The size of the
+variant is the size as selected by the tag value for the specific instance of
+the variant.
+
+A named variant declaration followed by its definition within a structure
+declaration:
+
+variant name {
+  field_type sel1;
+  field_type sel2;
+  field_type sel3;
+  ...
+};
+
+struct {
+  enum <integer_type or size> { sel1, sel2, sel3, ... } tag_field;
+  ...
+  variant name <tag_field> v;
+}
+
+An unnamed variant definition within a structure is expressed by the following
+metadata:
+
+struct {
+  enum <integer_type or size> { sel1, sel2, sel3, ... } tag_field;
+  ...
+  variant <tag_field> {
+    field_type sel1;
+    field_type sel2;
+    field_type sel3;
+    ...
+  } v;
+}
+
+Example of a named variant within a sequence that refers to a single tag field:
+
+variant example {
+  uint32_t a;
+  uint64_t b;
+  short c;
+};
+
+struct {
+  enum <uint2_t> { a, b, c } choice;
+  variant example <choice> u[unsigned int];
+}
+
+Example of an unnamed variant:
+
+struct {
+  enum <uint2_t> { a, b, c, d } choice;
+  /* Unrelated fields can be added between the variant and its tag */
+  int32_t somevalue;
+  variant <choice> {
+    uint32_t a;
+    uint64_t b;
+    short c;
+    struct {
+      unsigned int field1;
+      uint64_t field2;
+    } d;
+  } s;
+}
+
+Example of an unnamed variant within an array:
+
+struct {
+  enum <uint2_t> { a, b, c } choice;
+  variant <choice> {
+    uint32_t a;
+    uint64_t b;
+    short c;
+  } u[10];
+}
+
+Example of a variant type definition within a structure, where the defined type
+is then declared within an array of structures. This variant refers to a tag
+located in an upper lexical scope. This example clearly shows that a variant
+type definition referring to the tag "x" uses the closest preceding field from
+the lexical scope of the type definition.
+
+struct {
+  enum <uint2_t> { a, b, c, d } x;
+
+  typedef variant <x> {	/*
+			 * "x" refers to the preceding "x" enumeration in the
+			 * lexical scope of the type definition.
+			 */
+    uint32_t a;
+    uint64_t b;
+    short c;
+  } example_variant;
+
+  struct {
+    enum <int> { x, y, z } x;	/* This enumeration is not used by "v". */
+    example_variant v; 		/*
+				 * "v" uses the "enum <uint2_t> { a, b, c, d }"
+				 * tag.
+				 */
+  } a[10];
+}
+
+4.2.3 Arrays
 
 Arrays are fixed-length. Their length is declared in the type declaration within
 the metadata. They contain an array of "inner type" elements, which can refer to
@@ -351,7 +467,7 @@ A nameless array can be declared as a field type within a structure, e.g.:
   uint8_t field_name[10];
 
 
-4.2.3 Sequences
+4.2.4 Sequences
 
 Sequences are dynamically-sized arrays. They start with an integer that specify
 the length of the sequence, followed by an array of "inner type" elements.
@@ -368,7 +484,7 @@ long field_name[int];
 The length type follows the integer types specifications, and the sequence
 elements follow the "array" specifications.
 
-4.2.4 Strings
+4.2.5 Strings
 
 Strings are an array of bytes of variable size and are terminated by a '\0'
 "NULL" character.  Their encoding is described in the metadata. In absence of
@@ -478,17 +594,32 @@ struct event_packet_context {
   uint8_t  checksum;
 };
 
+
 6. Event Structure
 
 The overall structure of an event is:
 
-  - Event Header (as specifed by the stream metadata)
-  - Extended Event Header (as specified by the event header)
-  - Event Context (as specified by the stream metadata)
-  - Event Payload (as specified by the event metadata)
+1 - Stream Packet Context (as specified by the stream metadata)
+2 - Event Header (as specifed by the stream metadata)
+3 - Stream Event Context (as specified by the stream metadata)
+4 - Event Context (as specified by the event metadata)
+5 - Event Payload (as specified by the event metadata)
 
+6.1 Lexical Scope
 
-6.1 Event Header
+The lexical scope of each structure (stream packet context, header, stream event
+context, event context and payload) is extended in the following way: lower
+levels (e.g. 3) can refer to fields defined in prior levels (e.g. 2 and 1). The
+field in the closest level has priority in case of field name conflict.
+
+This allows, for instance, the event context to define a variant refering to the
+"id" field of the event header as selector.
+
+6.2 Event Header
+
+Event headers can be described within the metadata. We hereby propose, as an
+example, two types of events headers. Type 1 accommodates streams with less than
+31 event IDs. Type 2 accommodates streams with 31 or more event IDs.
 
 One major factor can vary between streams: the number of event IDs assigned to
 a stream. Luckily, this information tends to stay relatively constant (modulo
@@ -497,12 +628,8 @@ representations for streams containing few event IDs and streams containing
 many event IDs, so we end up representing the event ID and timestamp as densely
 as possible in each case.
 
-We therefore provide two types of events headers. Type 1 accommodates streams
-with less than 31 event IDs. Type 2 accommodates streams with 31 or more event
-IDs.
-
-The "extended headers" are used in the rare occasions where the information
-cannot be represented in the ranges available in the event header. They are also
+The header is extended in the rare occasions where the information cannot be
+represented in the ranges available in the standard event header. They are also
 used in the rare occasions where the data required for a field could not be
 collected: the flag corresponding to the missing field within the missing_fields
 array is then set to 1.
@@ -510,93 +637,102 @@ array is then set to 1.
 Types uintX_t represent an X-bit unsigned integer.
 
 
-6.1.1 Type 1 - Few event IDs
+6.2.1 Type 1 - Few event IDs
 
   - Aligned on 32-bit (or 8-bit if byte-packed, depending on the architecture
     preference).
-  - Fixed size: 32 bits.
   - Native architecture byte ordering.
+  - For "compact" selection
+    - Fixed size: 32 bits.
+  - For "extended" selection
+    - Size depends on the architecture and variant alignment.
 
 struct event_header_1 {
-  uint5_t id;		/*
-			 * id: range: 0 - 30.
-			 * id 31 is reserved to indicate a following
-			 * extended header.
-			 */
-  uint27_t timestamp;
-};
-
-The end of a type 1 header is aligned on a 32-bit boundary (or packed).
-
-
-6.1.2 Extended Type 1 Event Header
-
-  - Follows struct event_header_1, which is aligned on 32-bit, so no need to
-    realign.
-  - Variable size (depends on the number of fields per event).
-  - Native architecture byte ordering.
-  - NR_FIELDS is the number of fields within the event.
-
-struct event_header_1_ext {
-  uint32_t id;				/* 32-bit event IDs */
-  uint64_t timestamp;			/* 64-bit timestamps */
-  uint1_t missing_fields[NR_FIELDS];	/* missing event fields bitmap */
+  /*
+   * id: range: 0 - 30.
+   * id 31 is reserved to indicate an extended header.
+   */
+  enum <uint5_t> { compact = 0 ... 30, extended = 31 } id;
+  variant <id> {
+    struct {
+      uint27_t timestamp;
+    } compact;
+    struct {
+      uint32_t id;			 /* 32-bit event IDs */
+      uint64_t timestamp;		 /* 64-bit timestamps */
+    } extended;
+  } v;
 };
 
 
-6.1.3 Type 2 - Many event IDs
+6.2.2 Type 2 - Many event IDs
 
-  - Aligned on 32-bit (or 8-bit if byte-packed, depending on the architecture
+  - Aligned on 16-bit (or 8-bit if byte-packed, depending on the architecture
     preference).
-  - Fixed size: 48 bits.
   - Native architecture byte ordering.
+  - For "compact" selection
+    - Size depends on the architecture and variant alignment.
+  - For "extended" selection
+    - Size depends on the architecture and variant alignment.
 
 struct event_header_2 {
-  uint32_t timestamp;
-  uint16_t id;		/*
-			 * id: range: 0 - 65534.
-			 * id 65535 is reserved to indicate a following
-			 * extended header.
-			 */
-};
-
-The end of a type 2 header is aligned on a 16-bit boundary (or 8-bit if
-byte-packed).
-
-
-6.1.4 Extended Type 2 Event Header
-
-  - Follows struct event_header_2, which alignment end on a 16-bit boundary, so
-    we need to align on 64-bit integer architecture alignment (or 8-bit if
-    byte-packed).
-  - Variable size (depends on the number of fields per event).
-  - Native architecture byte ordering.
-  - NR_FIELDS is the number of fields within the event.
-
-struct event_header_2_ext {
-  uint64_t timestamp;			/* 64-bit timestamps */ 
-  uint32_t id;				/* 32-bit event IDs */
-  uint1_t missing_fields[NR_FIELDS];	/* missing event fields bitmap */
+  /*
+   * id: range: 0 - 65534.
+   * id 65535 is reserved to indicate an extended header.
+   */
+  enum <uint16_t> { compact = 0 ... 65534, extended = 65535 } id;
+  variant <id> {
+    struct {
+      uint32_t timestamp;
+    } compact;
+    struct {
+      uint32_t id;			 /* 32-bit event IDs */
+      uint64_t timestamp;		 /* 64-bit timestamps */ 
+    } extended;
+  } v;
 };
 
 
 6.2 Event Context
 
 The event context contains information relative to the current event. The choice
-and meaning of this information is specified by the metadata "stream"
-information. For this trace format, event context is usually empty, except when
-the metadata "stream" information specifies otherwise by declaring a non-empty
-structure for the event context. An example of event context is to save the
-event payload size with each event, or to save the current PID with each event.
-These are declared within the stream declaration within the metadata.
+and meaning of this information is specified by the metadata "stream" and
+"event" information. The "stream" context is applied to all events within the
+stream. The "stream" context structure follows the event header. The "event"
+context is applied to specific events. Its structure follows the "stream"
+context stucture.
 
-An example event context type:
+An example of stream-level event context is to save the event payload size with
+each event, or to save the current PID with each event.  These are declared
+within the stream declaration within the metadata:
 
-      struct event_context {
+  stream {
+    ...
+    event {
+      ...
+      context = struct {
         uint pid;
         uint16_t payload_size;
       };
+    }
+  };
 
+An example of event-specific event context is to declare a bitmap of missing
+fields, only appended after the stream event context if the extended event
+header is selected. NR_FIELDS is the number of fields within the event (a
+numeric value).
+
+  event {
+    context = struct {
+      variant <id> {
+        struct { } compact;
+        struct {
+          uint1_t missing_fields[NR_FIELDS]; /* missing event fields bitmap */
+        } extended;
+      } v;
+    };
+    ...
+  }
 
 6.3 Event Payload
 
@@ -622,7 +758,6 @@ The event payload is aligned on the largest alignment required by types
 contained within the payload. (This follows the ISO/C standard for structures)
 
 
-
 7. Metadata
 
 The meta-data is located in a stream named "metadata". It is made of "event
@@ -634,7 +769,12 @@ an event packet header, which contains, amongst other fields, the magic number
 and trace UUID.
 
 The metadata can be parsed by reading through the metadata strings, skipping
-newlines and null-characters. Type names may contain spaces.
+newlines and null-characters. Type names are made of a single identifier, and
+can be surrounded by prefix/postfix. Text contained within "/*" and "*/", as
+well as within "//" and end of line, are treated as comments.
+
+The grammar representing the CTF metadata is presented in
+Appendix C. CTF Metadata Grammar.
 
 trace {
   major = value;	/* Trace format version */
@@ -646,19 +786,15 @@ trace {
 stream {
   id = stream_id;
   event {
-    /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.1. */
-    header_type = event_header_1 OR event_header_2;
-    /*
-     * Extended event header type. Only present if specified in event header
-     * on a per-event basis.
-     */
-    header_type_ext = event_header_1_ext OR event_header_2_ext;
-    context_type = struct {
+    header_alignment = value;
+    /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.2. */
+    header = event_header_1 OR event_header_2;
+    context = struct {
       ...
     };
   };
   packet {
-    context_type = struct {
+    context = struct {
       ...
     };
   };
@@ -668,6 +804,9 @@ event {
   name = event_name;
   id = value;			/* Numeric identifier within the stream */
   stream = stream_id;
+  context = struct {
+    ...
+  };
   fields = struct {
     ...
   };
@@ -678,9 +817,9 @@ event {
 /*
  * Named types:
  *
- * A named type can only have a prefix and postfix if it aliases a CTF basic
- * type. A type name aliasing another type name cannot have prefix nor postfix,
- * but the type aliased can have a prefix and/or postfix.
+ * Type declarations behave similarly to the C standard, with the following
+ * added feature: new_type can be preceded by a colon to allow creation of a
+ * type name with prefix/postfix.
  */
 
 typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
@@ -689,7 +828,7 @@ typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
 
 typedef type_class {
   ...
-} new_type_prefix new_type new_type_postfix;
+} : new_type_prefix new_type new_type_postfix;
 
 /*
  * e.g.: 
@@ -697,10 +836,14 @@ typedef type_class {
  *   size = 32;
  *   align = 32;
  *   signed = false;
- * } struct page *;
+ * } : struct page *;
  */
 
 struct name {
+  ...
+};
+
+variant name {
   ...
 };
 
@@ -712,6 +855,10 @@ enum <integer_type or size> name {
 /* Unnamed types, contained within compound type fields or typedef. */
 
 struct {
+  ...
+}
+
+variant {
   ...
 }
 
@@ -746,6 +893,7 @@ struct {
 struct {
   string field_name;
 }
+
 
 A. Helper macros
 
@@ -785,3 +933,7 @@ flexibility in terms of:
 
 The event stream header will therefore be referred to as the "event packet
 header" throughout the rest of this document.
+
+C. CTF Metadata Grammar
+
+TODO
