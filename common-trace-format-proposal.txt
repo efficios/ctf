@@ -393,7 +393,7 @@ variant example {
 
 struct {
   enum <uint2_t> { a, b, c } choice;
-  variant example <choice> u[unsigned int];
+  variant example <choice> v[unsigned int];
 }
 
 Example of an unnamed variant:
@@ -421,7 +421,7 @@ struct {
     uint32_t a;
     uint64_t b;
     short c;
-  } u[10];
+  } v[10];
 }
 
 Example of a variant type definition within a structure, where the defined type
