@@ -771,7 +771,8 @@ and trace UUID.
 The metadata can be parsed by reading through the metadata strings, skipping
 newlines and null-characters. Type names are made of a single identifier, and
 can be surrounded by prefix/postfix. Text contained within "/*" and "*/", as
-well as within "//" and end of line, are treated as comments.
+well as within "//" and end of line, are treated as comments. Boolean values can
+be represented as true, TRUE, or 1 for true, and false, FALSE, or 0 for false.
 
 The grammar representing the CTF metadata is presented in
 Appendix C. CTF Metadata Grammar.
