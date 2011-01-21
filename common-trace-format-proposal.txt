@@ -335,7 +335,7 @@ struct {
   ...
 }
 
-4.2.2 Variants (Discriminated Unions)
+4.2.2 Variants (Discriminated/Tagged Unions)
 
 A CTF variant is a selection between different types. A CTF variant must always
 be defined within the scope of a structure or within fields contained within a
@@ -786,18 +786,13 @@ trace {
 
 stream {
   id = stream_id;
-  event {
-    header_alignment = value;
-    /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.2. */
-    header = event_header_1 OR event_header_2;
-    context = struct {
-      ...
-    };
+  /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.2. */
+  event.header = event_header_1 OR event_header_2;
+  event.context = struct {
+    ...
   };
-  packet {
-    context = struct {
-      ...
-    };
+  packet.context = struct {
+    ...
   };
 };
 
