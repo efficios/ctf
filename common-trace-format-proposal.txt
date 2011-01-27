@@ -981,6 +981,7 @@ stream
 string
 struct
 trace
+typealias
 typedef
 unsigned
 variant
