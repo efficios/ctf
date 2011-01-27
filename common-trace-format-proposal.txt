@@ -710,7 +710,7 @@ within the stream declaration within the metadata:
     ...
     event {
       ...
-      context = struct {
+      context := struct {
         uint pid;
         uint16_t payload_size;
       };
@@ -787,11 +787,11 @@ trace {
 stream {
   id = stream_id;
   /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.2. */
-  event.header = event_header_1 OR event_header_2;
-  event.context = struct {
+  event.header := event_header_1 OR event_header_2;
+  event.context := struct {
     ...
   };
-  packet.context = struct {
+  packet.context := struct {
     ...
   };
 };
@@ -800,10 +800,10 @@ event {
   name = event_name;
   id = value;			/* Numeric identifier within the stream */
   stream = stream_id;
-  context = struct {
+  context := struct {
     ...
   };
-  fields = struct {
+  fields := struct {
     ...
   };
 };
@@ -813,22 +813,27 @@ event {
 /*
  * Named types:
  *
- * Type declarations behave similarly to the C standard, with the following
- * added feature: new_type can be preceded by a colon to allow creation of a
- * type name with prefix/postfix.
+ * Type declarations behave similarly to the C standard.
  */
 
 typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
 
 /* e.g.: typedef struct example new_type_name[10]; */
 
-typedef type_class {
+/*
+ * typealias
+ *
+ * The "typealias" declaration can be used to give a name (including
+ * prefix/postfix) to a type.
+ */
+
+typealias type_class {
   ...
 } : new_type_prefix new_type new_type_postfix;
 
 /*
  * e.g.: 
- * typedef integer {
+ * typealias integer {
  *   size = 32;
  *   align = 32;
  *   signed = false;
@@ -848,7 +853,9 @@ enum <integer_type or size> name {
 };
 
 
-/* Unnamed types, contained within compound type fields or typedef. */
+/*
+ * Unnamed types, contained within compound type fields, typedef or typealias.
+ */
 
 struct {
   ...
@@ -932,4 +939,359 @@ header" throughout the rest of this document.
 
 C. CTF Metadata Grammar
 
-TODO
+/*
+ * Common Trace Format (CTF) Metadata Grammar.
+ *
+ * Inspired from the C99 grammar:
+ * http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf (Annex A)
+ *
+ * Specialized for CTF needs by including only constant and declarations from
+ * C99 (excluding function declarations), and by adding support for variants,
+ * sequences and CTF-specific specifiers.
+ */
+
+1) Lexical grammar
+
+1.1) Lexical elements
+
+token:
+	keyword
+	identifier
+	constant
+	string-literal
+	punctuator
+
+1.2) Keywords
+
+keyword: is one of
+
+const
+char
+double
+enum
+event
+floating_point
+float
+integer
+int
+long
+short
+signed
+stream
+string
+struct
+trace
+typedef
+unsigned
+variant
+void
+_Bool
+_Complex
+_Imaginary
+
+
+1.3) Identifiers
+
+identifier:
+	identifier-nondigit
+	identifier identifier-nondigit
+	identifier digit
+
+identifier-nondigit:
+	nondigit
+	universal-character-name
+	any other implementation-defined characters
+
+nondigit:
+	_
+	[a-zA-Z]	/* regular expression */
+
+digit:
+	[0-9]		/* regular expression */
+
+1.4) Universal character names
+
+universal-character-name:
+	\u hex-quad
+	\U hex-quad hex-quad
+
+hex-quad:
+	hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit
+
+1.5) Constants
+
+constant:
+	integer-constant
+	enumeration-constant
+	character-constant
+
+integer-constant:
+	decimal-constant integer-suffix-opt
+	octal-constant integer-suffix-opt
+	hexadecimal-constant integer-suffix-opt
+
+decimal-constant:
+	nonzero-digit
+	decimal-constant digit
+
+octal-constant:
+	0
+	octal-constant octal-digit
+
+hexadecimal-constant:
+	hexadecimal-prefix hexadecimal-digit
+	hexadecimal-constant hexadecimal-digit
+
+hexadecimal-prefix:
+	0x
+	0X
+
+nonzero-digit:
+	[1-9]
+
+integer-suffix:
+	unsigned-suffix long-suffix-opt
+	unsigned-suffix long-long-suffix
+	long-suffix unsigned-suffix-opt
+	long-long-suffix unsigned-suffix-opt
+
+unsigned-suffix:
+	u
+	U
+
+long-suffix:
+	l
+	L
+
+long-long-suffix:
+	ll
+	LL
+
+digit-sequence:
+	digit
+	digit-sequence digit
+
+hexadecimal-digit-sequence:
+	hexadecimal-digit
+	hexadecimal-digit-sequence hexadecimal-digit
+
+enumeration-constant:
+	identifier
+	string-literal
+
+character-constant:
+	' c-char-sequence '
+	L' c-char-sequence '
+
+c-char-sequence:
+	c-char
+	c-char-sequence c-char
+
+c-char:
+	any member of source charset except single-quote ('), backslash
+	(\), or new-line character.
+	escape-sequence
+
+escape-sequence:
+	simple-escape-sequence
+	octal-escape-sequence
+	hexadecimal-escape-sequence
+	universal-character-name
+
+simple-escape-sequence: one of
+	\' \" \? \\ \a \b \f \n \r \t \v
+
+octal-escape-sequence:
+	\ octal-digit
+	\ octal-digit octal-digit
+	\ octal-digit octal-digit octal-digit
+
+hexadecimal-escape-sequence:
+	\x hexadecimal-digit
+	hexadecimal-escape-sequence hexadecimal-digit
+
+1.6) String literals
+
+string-literal:
+	" s-char-sequence-opt "
+	L" s-char-sequence-opt "
+
+s-char-sequence:
+	s-char
+	s-char-sequence s-char
+
+s-char:
+	any member of source charset except double-quote ("), backslash
+	(\), or new-line character.
+	escape-sequence
+
+1.7) Punctuators
+
+punctuator: one of
+	[ ] ( ) { } . -> * + - < > : ; ... = ,
+
+
+2) Phrase structure grammar
+
+primary-expression:
+	identifier
+	constant
+	string-literal
+	( unary-expression )
+
+postfix-expression:
+	primary-expression
+	postfix-expression [ unary-expression ]
+	postfix-expression . identifier
+	postfix-expressoin -> identifier
+
+unary-expression:
+	postfix-expression
+	unary-operator postfix-expression
+
+unary-operator: one of
+	+ -
+
+assignment-expression:
+	unary-expression assignment-operator unary-expression
+
+assignment-operator:
+	=
+
+constant-expression:
+	unary-expression
+
+constant-expression-range:
+	constant-expression ... constant-expression
+
+2.2) Declarations:
+
+declaration:
+	declaration-specifiers declarator-list-opt ;
+	ctf-specifier ;
+
+declaration-specifiers:
+	storage-class-specifier declaration-specifiers-opt
+	type-specifier declaration-specifiers-opt
+	type-qualifier declaration-specifiers-opt
+
+declarator-list:
+	declarator
+	declarator-list , declarator
+
+storage-class-specifier:
+	typedef
+
+type-specifier:
+	void
+	char
+	short
+	int
+	long
+	float
+	double
+	signed
+	unsigned
+	_Bool
+	_Complex
+	struct-or-variant-specifier
+	enum-specifier
+	typedef-name
+	ctf-type-specifier
+
+struct-specifier:
+	struct identifier-opt { struct-or-variant-declaration-list }
+	struct identifier
+
+struct-or-variant-declaration-list:
+	struct-or-variant-declaration
+	struct-or-variant-declaration-list struct-or-variant-declaration
+
+struct-or-variant-declaration:
+	specifier-qualifier-list struct-or-variant-declarator-list ;
+
+specifier-qualifier-list:
+	type-specifier specifier-qualifier-list-opt
+	type-qualifier specifier-qualifier-list-opt
+
+struct-or-variant-declarator-list:
+	struct-or-variant-declarator
+	struct-or-variant-declarator-list , struct-or-variant-declarator
+
+struct-or-variant-declarator:
+	declarator
+	declarator-opt : constant-expression
+
+variant-specifier:
+	variant identifier-opt variant-tag-opt { struct-or-variant-declaration-list }
+	variant identifier variant-tag
+
+variant-tag:
+	< identifier >
+
+enum-specifier:
+	enum identifier-opt { enumerator-list }
+	enum identifier-opt { enumerator-list , }
+	enum identifier
+	enum identifier-opt < type-specifier > { enumerator-list }
+	enum identifier-opt < type-specifier > { enumerator-list , }
+	enum identifier < type-specifier >
+	enum identifier-opt < integer-constant > { enumerator-list }
+	enum identifier-opt < integer-constant > { enumerator-list , }
+	enum identifier < integer-constant >
+
+enumerator-list:
+	enumerator
+	enumerator-list , enumerator
+
+enumerator:
+	enumeration-constant
+	enumeration-constant = constant-expression
+	enumeration-constant = constant-expression-range
+
+type-qualifier:
+	const
+
+declarator:
+	pointer-opt direct-declarator
+
+direct-declarator:
+	identifier
+	( declarator )
+	direct-declarator [ type-specifier ]
+	direct-declarator [ constant-expression ]
+
+pointer:
+	type-qualifier-list-opt
+	type-qualifier-list-opt pointer
+
+type-qualifier-list:
+	type-qualifier
+	type-qualifier-list type-qualifier
+
+identifier-list:
+	identifier
+	identifier-list , identifier
+
+typedef-name:
+	identifier
+
+2.3) CTF-specific declarations
+
+ctf-specifier:
+	event { ctf-assignment-expression-list-opt }
+	stream { ctf-assignment-expression-list-opt }
+	trace { ctf-assignment-expression-list-opt }
+
+ctf-type-specifier:
+	floating_point { ctf-assignment-expression-list-opt }
+	integer { ctf-assignment-expression-list-opt }
+	string { ctf-assignment-expression-list-opt }
+
+ctf-assignment-expression-list:
+	ctf-assignment-expression
+	ctf-assignment-expression-list ; ctf-assignment-expression
+
+ctf-assignment-expression:
+	unary-expression assignment-operator unary-expression
+	unary-expression type-assignment-operator type-specifier
