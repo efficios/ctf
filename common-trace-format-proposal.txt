@@ -273,7 +273,7 @@ repeating the start and end values with the value = string declaration.
 If a numeric value is encountered between < >, it represents the integer type
 size used to hold the enumeration, in bits.
 
-enum <integer_type OR size> name {
+enum name <integer_type OR size> {
   string              = start_value1 ... end_value1,
   "other string"      = start_value2 ... end_value2,
   yet_another_string,	/* will be assigned to end_value2 + 1 */
@@ -284,7 +284,7 @@ enum <integer_type OR size> name {
 If the values are omitted, the enumeration starts at 0 and increment of 1 for
 each entry:
 
-enum <32> name {
+enum name <32> {
   ZERO,
   ONE,
   TWO,
@@ -848,7 +848,7 @@ variant name {
   ...
 };
 
-enum <integer_type or size> name {
+enum name <integer_type or size> {
   ...
 };
 
