@@ -1153,9 +1153,6 @@ unary-expression:
 unary-operator: one of
 	+ -
 
-assignment-expression:
-	unary-expression assignment-operator unary-expression
-
 assignment-operator:
 	=
 
@@ -1195,7 +1192,8 @@ type-specifier:
 	unsigned
 	_Bool
 	_Complex
-	struct-or-variant-specifier
+	struct-specifier
+	variant-specifier
 	enum-specifier
 	typedef-name
 	ctf-type-specifier
@@ -1269,10 +1267,6 @@ pointer:
 type-qualifier-list:
 	type-qualifier
 	type-qualifier-list type-qualifier
-
-identifier-list:
-	identifier
-	identifier-list , identifier
 
 typedef-name:
 	identifier
