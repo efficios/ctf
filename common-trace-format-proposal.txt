@@ -1208,6 +1208,8 @@ struct-or-variant-declaration-list:
 
 struct-or-variant-declaration:
 	specifier-qualifier-list struct-or-variant-declarator-list ;
+	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list ;
+	typealias declaration-specifiers declaration-specifiers declarator-list : declaration-specifiers declarator-list ;
 
 specifier-qualifier-list:
 	type-specifier specifier-qualifier-list-opt
@@ -1291,3 +1293,5 @@ ctf-assignment-expression-list:
 ctf-assignment-expression:
 	unary-expression assignment-operator unary-expression
 	unary-expression type-assignment-operator type-specifier
+	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list
+	typealias declaration-specifiers declaration-specifiers declarator-list : declaration-specifiers declarator-list
