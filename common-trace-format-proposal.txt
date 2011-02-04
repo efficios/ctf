@@ -591,7 +591,7 @@ struct event_packet_context {
   uint8_t  stream_packet_count_bits;	/* Significant counter bits */
   uint8_t  compression_scheme;
   uint8_t  encryption_scheme;
-  uint8_t  checksum;
+  uint8_t  checksum_scheme;
 };
 
 
@@ -1165,11 +1165,11 @@ constant-expression-range:
 2.2) Declarations:
 
 declaration:
-	declaration-specifiers declarator-list-opt ;
+	declaration-specifiers ;
+	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list ;
 	ctf-specifier ;
 
 declaration-specifiers:
-	storage-class-specifier declaration-specifiers-opt
 	type-specifier declaration-specifiers-opt
 	type-qualifier declaration-specifiers-opt
 
@@ -1199,7 +1199,7 @@ type-specifier:
 	ctf-type-specifier
 
 struct-specifier:
-	struct identifier-opt { struct-or-variant-declaration-list }
+	struct identifier-opt { struct-or-variant-declaration-list-opt }
 	struct identifier
 
 struct-or-variant-declaration-list:
@@ -1261,8 +1261,8 @@ direct-declarator:
 	direct-declarator [ constant-expression ]
 
 pointer:
-	type-qualifier-list-opt
-	type-qualifier-list-opt pointer
+	* type-qualifier-list-opt
+	* type-qualifier-list-opt pointer
 
 type-qualifier-list:
 	type-qualifier
@@ -1277,6 +1277,7 @@ ctf-specifier:
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
+	typealias declaration-specifiers declaration-specifiers declarator-list : declaration-specifiers declarator-list ;
 
 ctf-type-specifier:
 	floating_point { ctf-assignment-expression-list-opt }
