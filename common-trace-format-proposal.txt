@@ -607,10 +607,11 @@ The overall structure of an event is:
 
 6.1 Lexical Scope
 
-The lexical scope of each structure (stream packet context, header, stream event
-context, event context and payload) is extended in the following way: lower
-levels (e.g. 3) can refer to fields defined in prior levels (e.g. 2 and 1). The
-field in the closest level has priority in case of field name conflict.
+For variant tag definition only, the lexical scope of each structure (stream
+packet context, header, stream event context, event context and payload) is
+extended in the following way: lower levels (e.g. 3) can refer to fields defined
+in prior levels (e.g. 2 and 1). The field in the closest level has priority in
+case of field name conflict.
 
 This allows, for instance, the event context to define a variant refering to the
 "id" field of the event header as selector.
@@ -773,6 +774,11 @@ newlines and null-characters. Type names are made of a single identifier, and
 can be surrounded by prefix/postfix. Text contained within "/*" and "*/", as
 well as within "//" and end of line, are treated as comments. Boolean values can
 be represented as true, TRUE, or 1 for true, and false, FALSE, or 0 for false.
+
+Each of "trace", "stream", "event", "struct" and "variant" have their own
+nestable declaration scope, within which types can be declared using "typedef"
+and "typealias". An innermost declaration scope can refer to type declared
+within its container lexical scope prior to the innermost declaration scope.
 
 The grammar representing the CTF metadata is presented in
 Appendix C. CTF Metadata Grammar.
@@ -1177,6 +1183,10 @@ declarator-list:
 	declarator
 	declarator-list , declarator
 
+abstract-declarator-list:
+	abstract-declarator
+	abstract-declarator-list , abstract-declarator
+
 storage-class-specifier:
 	typedef
 
@@ -1209,7 +1219,8 @@ struct-or-variant-declaration-list:
 struct-or-variant-declaration:
 	specifier-qualifier-list struct-or-variant-declarator-list ;
 	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list ;
-	typealias declaration-specifiers declaration-specifiers declarator-list : declaration-specifiers declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list : declaration-specifiers abstract-declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list : declarator-list ;
 
 specifier-qualifier-list:
 	type-specifier specifier-qualifier-list-opt
@@ -1262,6 +1273,16 @@ direct-declarator:
 	direct-declarator [ type-specifier ]
 	direct-declarator [ constant-expression ]
 
+abstract-declarator:
+	pointer-opt direct-abstract-declarator
+
+direct-abstract-declarator:
+	identifier-opt
+	( abstract-declarator )
+	direct-abstract-declarator [ type-specifier ]
+	direct-abstract-declarator [ constant-expression ]
+	direct-abstract-declarator [ ]
+
 pointer:
 	* type-qualifier-list-opt
 	* type-qualifier-list-opt pointer
@@ -1279,7 +1300,8 @@ ctf-specifier:
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
-	typealias declaration-specifiers declaration-specifiers declarator-list : declaration-specifiers declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list : declaration-specifiers abstract-declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list : declarator-list ;
 
 ctf-type-specifier:
 	floating_point { ctf-assignment-expression-list-opt }
@@ -1294,4 +1316,5 @@ ctf-assignment-expression:
 	unary-expression assignment-operator unary-expression
 	unary-expression type-assignment-operator type-specifier
 	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list
-	typealias declaration-specifiers declaration-specifiers declarator-list : declaration-specifiers declarator-list
+	typealias declaration-specifiers abstract-declarator-list : declaration-specifiers abstract-declarator-list
+	typealias declaration-specifiers abstract-declarator-list : declarator-list
