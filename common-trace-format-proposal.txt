@@ -181,19 +181,19 @@ Metadata representation:
 
 Example of type inheritance (creation of a uint32_t named type):
 
-typedef integer {
+typealias integer {
   size = 32;
   signed = false;
   align = 32;
-} uint32_t;
+} : uint32_t;
 
 Definition of a named 5-bit signed bitfield:
 
-typedef integer {
+typealias integer {
   size = 5;
   signed = true;
   align = 1;
-} int5_t;
+} : int5_t;
 
 4.1.6 GNU/C bitfields
 
@@ -248,11 +248,11 @@ floating_point {
 
 Example of type inheritance:
 
-typedef floating_point {
+typealias floating_point {
   exp_dig = 8;         /* sizeof(float) * CHAR_BIT - FLT_MANT_DIG */
   mant_dig = 24;       /* FLT_MANT_DIG */
   byte_order = native;
-} float;
+} : float;
 
 TODO: define NaN, +inf, -inf behavior.
 
@@ -274,7 +274,7 @@ If a numeric value is encountered between < >, it represents the integer type
 size used to hold the enumeration, in bits.
 
 enum name <integer_type OR size> {
-  string              = start_value1 ... end_value1,
+  somestring          = start_value1 ... end_value1,
   "other string"      = start_value2 ... end_value2,
   yet_another_string,	/* will be assigned to end_value2 + 1 */
   "some other string" = value,
@@ -492,9 +492,9 @@ encoding attribute information, the default encoding is UTF-8.
 
 Metadata representation of a named string type:
 
-typedef string {
+typealias string {
   encoding = UTF8 OR ASCII;
-} name;
+} : name;
 
 A nameless string type can be declared as a field type:
 
@@ -779,6 +779,8 @@ Each of "trace", "stream", "event", "struct" and "variant" have their own
 nestable declaration scope, within which types can be declared using "typedef"
 and "typealias". An innermost declaration scope can refer to type declared
 within its container lexical scope prior to the innermost declaration scope.
+Redefinition of a typedef or typealias, or hiding an uppermost definition, is
+not valid.
 
 The grammar representing the CTF metadata is presented in
 Appendix C. CTF Metadata Grammar.
@@ -830,7 +832,10 @@ typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
  * typealias
  *
  * The "typealias" declaration can be used to give a name (including
- * prefix/postfix) to a type.
+ * prefix/postfix) to a type. It should also be used to map basic C types
+ * (float, int, unsigned long, ...) to a CTF type. Typealias is a superset of
+ * "typedef": it also allows assignment of a simple variable identifier to a
+ * type.
  */
 
 typealias type_class {
@@ -844,6 +849,12 @@ typealias type_class {
  *   align = 32;
  *   signed = false;
  * } : struct page *;
+ *
+ * typealias integer {
+ *  size = 32;
+ *  align = 32;
+ *  signed = true;
+ * } : int;
  */
 
 struct name {
@@ -1245,9 +1256,9 @@ enum-specifier:
 	enum identifier-opt { enumerator-list }
 	enum identifier-opt { enumerator-list , }
 	enum identifier
-	enum identifier-opt < type-specifier > { enumerator-list }
-	enum identifier-opt < type-specifier > { enumerator-list , }
-	enum identifier < type-specifier >
+	enum identifier-opt < declaration-specifiers > { enumerator-list }
+	enum identifier-opt < declaration-specifiers > { enumerator-list , }
+	enum identifier < declaration-specifiers >
 	enum identifier-opt < integer-constant > { enumerator-list }
 	enum identifier-opt < integer-constant > { enumerator-list , }
 	enum identifier < integer-constant >
