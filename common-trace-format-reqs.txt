@@ -16,7 +16,7 @@ Aaron Spear <aaron_spear@mentor.com>
 Philippe Maisonneuve <Philippe.Maisonneuve@windriver.com>
 Felix Burton <Felix.Burton@windriver.com>
 Andrew McDermott <Andrew.McDermott@windriver.com>
-"Frank Ch. Eigler" <fche@redhat.com>
+Frank Ch. Eigler <fche@redhat.com>
 Michel Dagenais <michel.dagenais@polymtl.ca>
 Stefan Hajnoczi <stefanha@gmail.com>
 Multi-Core Association Tool Infrastructure Workgroup
