@@ -83,9 +83,13 @@ header" throughout the rest of this document.
 
 4. Types
 
+Types are organized as type classes. Each type class belong to either of two
+kind of types: basic types or compound types.
+
 4.1 Basic types
 
-A basic type is a scalar type, as described in this section.
+A basic type is a scalar type, as described in this section. It includes
+integers, GNU/C bitfields, enumerations, and floating point values.
 
 4.1.1 Type inheritance
 
@@ -300,7 +304,11 @@ enum <integer_type> {
   ...
 }
 
+
 4.2 Compound types
+
+Compound are aggregation of type declarations. Compound types include
+structures, variant, arrays, sequences, and strings.
 
 4.2.1 Structures
 
