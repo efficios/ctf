@@ -616,9 +616,9 @@ The overall structure of an event is:
     5 - Event Payload (as specified by the event metadata)
 
 This structure defines an implicit dynamic scoping, where variants
-located in structures with higher number can refer to the fields of
-structures with lower number. See Section 7.2 Metadata Scopes for more
-detail.
+located in inner structures (those with a higher number in the listing
+above) can refer to the fields of outer structures (with lower number in
+the listing above). See Section 7.2 Metadata Scopes for more detail.
 
 6.1 Event Header
 
@@ -808,34 +808,36 @@ for variants references to tag fields.
 Each of "trace", "stream", "event", "struct" and "variant" have their own
 nestable declaration scope, within which types can be declared using "typedef"
 and "typealias". A root declaration scope also contains all declarations
-located outside of any of the aforementioned declarations. An innermost
+located outside of any of the aforementioned declarations. An inner
 declaration scope can refer to type declared within its container
-lexical scope prior to the innermost declaration scope. Redefinition of
-a typedef or typealias is not valid, although hiding an uppermost scope
+lexical scope prior to the inner declaration scope. Redefinition of a
+typedef or typealias is not valid, although hiding an upper scope
 typedef or typealias is allowed within a sub-scope.
 
 7.2.2 Dynamic Scope
 
-For variant tag definition only, the dynamic scope used to look up the
-location of the associated tag field consists in the lexical scope of
-the structures where the variant is declared, extended with the implicit
-dynamic scope specified by the event structure hierarchy presented at
-the beginning of Section 6. Therefore, lower levels in the dynamic scope
-(e.g. event context) can refer to a tag field located in upper levels
-(e.g. in the event header) by specifying, in this case,
-"header.field_name" as tag identifier.  This allows, for instance, the
-event context to define a variant referring to the "id" field of the
-event header as selector.
+A dynamic scope consists in the lexical scope augmented with the
+implicit event structure definition hierarchy presented at Section 6.
+The dynamic scope is only used for variant tag definitions. It is used
+at definition time to look up the location of the tag field associated
+with a variant.
+
+Therefore, variants in lower levels in the dynamic scope (e.g. event
+context) can refer to a tag field located in upper levels (e.g. in the
+event header) by specifying, in this case, the associated tag with
+<header.field_name>. This allows, for instance, the event context to
+define a variant referring to the "id" field of the event header as
+selector.
 
 The target dynamic scope must be specified explicitly when referring to
 a field outside of the local static scope. The dynamic scope prefixes
 are thus:
 
- - Stream Packet Context: "stream.packet.context.",
- - Event Header: "stream.event.header.",
- - Stream Event Context: "stream.event.context.",
- - Event Context: "event.context.",
- - Event Payload: "event.fields.".
+ - Stream Packet Context: <stream.packet.context. >,
+ - Event Header: <stream.event.header. >,
+ - Stream Event Context: <stream.event.context. >,
+ - Event Context: <event.context. >,
+ - Event Payload: <event.fields. >.
 
 Multiple declarations of the same field name within a single scope is
 not valid. It is however valid to re-use the same field name in
