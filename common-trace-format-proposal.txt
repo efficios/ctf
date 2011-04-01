@@ -345,15 +345,17 @@ struct {
 
 4.2.2 Variants (Discriminated/Tagged Unions)
 
-A CTF variant is a selection between different types. A CTF variant must always
-be defined within the scope of a structure or within fields contained within a
-structure (defined recursively). A "tag" enumeration field must appear in either
-the same lexical scope or an uppermost scope, prior to the variant field (in
-field declaration order). The type selection is indicated by the mapping from
-the enumeration value to the string used as variant type selector. The field to
-use as tag is specified by the "tag_field", specified between "< >" after the
-"variant" keyword for unnamed variants, and after "variant name" for named
-variants.
+A CTF variant is a selection between different types. A CTF variant must
+always be defined within the scope of a structure or within fields
+contained within a structure (defined recursively). A "tag" enumeration
+field must appear in either the same lexical scope, prior to the variant
+field (in field declaration order), in an uppermost lexical scope (see
+Section 7.2.1), or in an uppermost dynamic scope (see Section 7.2.2).
+The type selection is indicated by the mapping from the enumeration
+value to the string used as variant type selector. The field to use as
+tag is specified by the "tag_field", specified between "< >" after the
+"variant" keyword for unnamed variants, and after "variant name" for
+named variants.
 
 The alignment of the variant is the alignment of the type as selected by the tag
 value for the specific instance of the variant. The alignment of the type
@@ -608,23 +610,17 @@ struct event_packet_context {
 The overall structure of an event is:
 
 1 - Stream Packet Context (as specified by the stream metadata)
-2 - Event Header (as specifed by the stream metadata)
-3 - Stream Event Context (as specified by the stream metadata)
-4 - Event Context (as specified by the event metadata)
-5 - Event Payload (as specified by the event metadata)
+ 2 - Event Header (as specified by the stream metadata)
+  3 - Stream Event Context (as specified by the stream metadata)
+   4 - Event Context (as specified by the event metadata)
+    5 - Event Payload (as specified by the event metadata)
 
-6.1 Lexical Scope
+This structure defines an implicit dynamic scoping, where variants
+located in structures with higher number can refer to the fields of
+structures with lower number. See Section 7.2 Metadata Scopes for more
+detail.
 
-For variant tag definition only, the lexical scope of each structure (stream
-packet context, header, stream event context, event context and payload) is
-extended in the following way: lower levels (e.g. 3) can refer to fields defined
-in prior levels (e.g. 2 and 1). The field in the closest level has priority in
-case of field name conflict.
-
-This allows, for instance, the event context to define a variant refering to the
-"id" field of the event header as selector.
-
-6.2 Event Header
+6.1 Event Header
 
 Event headers can be described within the metadata. We hereby propose, as an
 example, two types of events headers. Type 1 accommodates streams with less than
@@ -646,7 +642,7 @@ array is then set to 1.
 Types uintX_t represent an X-bit unsigned integer.
 
 
-6.2.1 Type 1 - Few event IDs
+6.1.1 Type 1 - Few event IDs
 
   - Aligned on 32-bit (or 8-bit if byte-packed, depending on the architecture
     preference).
@@ -674,7 +670,7 @@ struct event_header_1 {
 };
 
 
-6.2.2 Type 2 - Many event IDs
+6.1.2 Type 2 - Many event IDs
 
   - Aligned on 16-bit (or 8-bit if byte-packed, depending on the architecture
     preference).
@@ -775,7 +771,8 @@ the metadata stream have no event header nor event context. Each event only
 contains a null-terminated "string" payload, which is a metadata description
 entry. The events are packed one next to another. Each event packet start with
 an event packet header, which contains, amongst other fields, the magic number
-and trace UUID.
+and trace UUID. The trace UUID is represented as a string of hexadecimal digits
+and dashes "-".
 
 The metadata can be parsed by reading through the metadata strings, skipping
 newlines and null-characters. Type names are made of a single identifier, and
@@ -783,26 +780,86 @@ can be surrounded by prefix/postfix. Text contained within "/*" and "*/", as
 well as within "//" and end of line, are treated as comments. Boolean values can
 be represented as true, TRUE, or 1 for true, and false, FALSE, or 0 for false.
 
+
+7.1 Declaration vs Definition
+
+A declaration associates a layout to a type, without specifying where
+this type is located in the event structure hierarchy (see Section 6).
+This therefore includes typedef, typealias, as well as all type
+specifiers. In certain circumstances (typedef, structure field and
+variant field), a declaration is followed by a declarator, which specify
+the newly defined type name (for typedef), or the field name (for
+declarations located within structure and variants). Array and sequence,
+declared with square brackets ("[" "]"), are part of the declarator,
+similarly to C99.
+
+A definition associates a type to a location in the event structure
+hierarchy (see Section 6).
+
+
+7.2 Metadata Scopes
+
+CTF metadata uses two different types of scoping: a lexical scope is
+used for declarations and type definitions, and a dynamic scope is used
+for variants references to tag fields.
+
+7.2.1 Lexical Scope
+
 Each of "trace", "stream", "event", "struct" and "variant" have their own
 nestable declaration scope, within which types can be declared using "typedef"
-and "typealias". An innermost declaration scope can refer to type declared
-within its container lexical scope prior to the innermost declaration scope.
-Redefinition of a typedef or typealias, or hiding an uppermost definition, is
-not valid.
+and "typealias". A root declaration scope also contains all declarations
+located outside of any of the aforementioned declarations. An innermost
+declaration scope can refer to type declared within its container
+lexical scope prior to the innermost declaration scope. Redefinition of
+a typedef or typealias is not valid, although hiding an uppermost scope
+typedef or typealias is allowed within a sub-scope.
+
+7.2.2 Dynamic Scope
+
+For variant tag definition only, the dynamic scope used to look up the
+location of the associated tag field consists in the lexical scope of
+the structures where the variant is declared, extended with the implicit
+dynamic scope specified by the event structure hierarchy presented at
+the beginning of Section 6. Therefore, lower levels in the dynamic scope
+(e.g. event context) can refer to a tag field located in upper levels
+(e.g. in the event header) by specifying, in this case,
+"header.field_name" as tag identifier.  This allows, for instance, the
+event context to define a variant referring to the "id" field of the
+event header as selector.
+
+The target dynamic scope must be specified explicitly when referring to
+a field outside of the local static scope. The dynamic scope prefixes
+are thus:
+
+ - Stream Packet Context: "stream.packet.context.",
+ - Event Header: "stream.event.header.",
+ - Stream Event Context: "stream.event.context.",
+ - Event Context: "event.context.",
+ - Event Payload: "event.fields.".
+
+Multiple declarations of the same field name within a single scope is
+not valid. It is however valid to re-use the same field name in
+different scopes. There is no possible conflict, because the dynamic
+scope must be specified when a variant refers to a tag field located in
+a different dynamic scope.
+
+
+7.2 Metadata Examples
 
 The grammar representing the CTF metadata is presented in
-Appendix C. CTF Metadata Grammar.
+Appendix C. CTF Metadata Grammar. This section presents a rather ligher
+reading that consists in examples of CTF metadata, with template values:
 
 trace {
-  major = value;	/* Trace format version */
+  major = value;				/* Trace format version */
   minor = value;
-  uuid = value;		/* Trace UUID */
+  uuid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";	/* Trace UUID */
   word_size = value;
 };
 
 stream {
   id = stream_id;
-  /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.2. */
+  /* Type 1 - Few event IDs; Type 2 - Many event IDs. See section 6.1. */
   event.header := event_header_1 OR event_header_2;
   event.context := struct {
     ...
