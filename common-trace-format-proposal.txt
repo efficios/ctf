@@ -791,7 +791,8 @@ variant field), a declaration is followed by a declarator, which specify
 the newly defined type name (for typedef), or the field name (for
 declarations located within structure and variants). Array and sequence,
 declared with square brackets ("[" "]"), are part of the declarator,
-similarly to C99.
+similarly to C99. The enumeration type specifier and variant tag name
+(both specified with "<" ">") are part of the type specifier.
 
 A definition associates a type to a location in the event structure
 hierarchy (see Section 6).
@@ -844,6 +845,12 @@ not valid. It is however valid to re-use the same field name in
 different scopes. There is no possible conflict, because the dynamic
 scope must be specified when a variant refers to a tag field located in
 a different dynamic scope.
+
+The information available in the dynamic scopes can be thought of as the
+current tracing context. At trace production, information about the
+current context is saved into the specified scope field levels. At trace
+consumption, for each event, the current trace context is therefore
+readable by accessing the upper dynamic scopes.
 
 
 7.2 Metadata Examples
