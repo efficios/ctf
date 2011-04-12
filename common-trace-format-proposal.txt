@@ -68,14 +68,10 @@ A metadata event stream contains information on trace event types. It describes:
 3. Event stream
 
 An event stream is divided in contiguous event packets of variable size. These
-subdivisions have a variable size. An event packet can contain a certain amount
-of padding at the end. The rationale for the event stream design choices is
-explained in Appendix B. Stream Header Rationale.
-
-An event stream is divided in contiguous event packets of variable size. These
-subdivisions have a variable size. An event packet can contain a certain amount
-of padding at the end.  The stream header is repeated at the beginning of each
-event packet.
+subdivisions have a variable size. An event packet can contain a certain
+amount of padding at the end. The stream header is repeated at the
+beginning of each event packet. The rationale for the event stream
+design choices is explained in Appendix B. Stream Header Rationale.
 
 The event stream header will therefore be referred to as the "event packet
 header" throughout the rest of this document.
