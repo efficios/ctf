@@ -791,7 +791,8 @@ similarly to C99. The enumeration type specifier and variant tag name
 (both specified with "<" ">") are part of the type specifier.
 
 A definition associates a type to a location in the event structure
-hierarchy (see Section 6).
+hierarchy (see Section 6). This association is denoted by ":=", as shown
+in Section 7.3.
 
 
 7.2 Metadata Scopes
@@ -849,7 +850,7 @@ consumption, for each event, the current trace context is therefore
 readable by accessing the upper dynamic scopes.
 
 
-7.2 Metadata Examples
+7.3 Metadata Examples
 
 The grammar representing the CTF metadata is presented in
 Appendix C. CTF Metadata Grammar. This section presents a rather ligher
@@ -1242,6 +1243,9 @@ unary-operator: one of
 
 assignment-operator:
 	=
+
+type-assignment-operator:
+	:=
 
 constant-expression:
 	unary-expression
