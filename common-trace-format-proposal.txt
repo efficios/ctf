@@ -1256,11 +1256,11 @@ constant-expression-range:
 2.2) Declarations:
 
 declaration:
-	declaration-specifiers ;
-	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list ;
+	declaration-specifiers declarator-list-opt ;
 	ctf-specifier ;
 
 declaration-specifiers:
+	storage-class-specifier declaration-specifiers-opt
 	type-specifier declaration-specifiers-opt
 	type-qualifier declaration-specifiers-opt
 
