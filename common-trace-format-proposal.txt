@@ -761,20 +761,23 @@ contained within the payload. (This follows the ISO/C standard for structures)
 
 7. Metadata
 
-The meta-data is located in a stream named "metadata". It is made of "event
-packets", which each start with an event packet header. The event type within
-the metadata stream have no event header nor event context. Each event only
-contains a null-terminated "string" payload, which is a metadata description
-entry. The events are packed one next to another. Each event packet start with
-an event packet header, which contains, amongst other fields, the magic number
-and trace UUID. The trace UUID is represented as a string of hexadecimal digits
-and dashes "-".
+The meta-data is located in a stream identified by its name: "metadata".
+It is made of "event packets", which each start with an event packet
+header. The event type within the metadata stream have no event header
+nor event context. Each event only contains a null-terminated "string"
+payload, which is a metadata description entry. The events are packed
+one next to another. Each event packet start with an event packet
+header, which contains, amongst other fields, the magic number and trace
+UUID. In the event packet header, the trace UUID is represented as an
+array of bytes. Within the string-based metadata description, the trace
+UUID is represented as a string of hexadecimal digits and dashes "-".
 
-The metadata can be parsed by reading through the metadata strings, skipping
-newlines and null-characters. Type names are made of a single identifier, and
-can be surrounded by prefix/postfix. Text contained within "/*" and "*/", as
-well as within "//" and end of line, are treated as comments. Boolean values can
-be represented as true, TRUE, or 1 for true, and false, FALSE, or 0 for false.
+The metadata can be parsed by reading through the metadata strings,
+skipping null-characters. Type names are made of a single identifier,
+and can be surrounded by prefix/postfix. Text contained within "/*" and
+"*/", as well as within "//" and end of line, are treated as comments.
+Boolean values can be represented as true, TRUE, or 1 for true, and
+false, FALSE, or 0 for false.
 
 
 7.1 Declaration vs Definition
