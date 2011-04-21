@@ -271,10 +271,7 @@ this format by having the same start_value and end_value for each element, which
 is in fact a range of size 1. This single-value range is supported without
 repeating the start and end values with the value = string declaration.
 
-If a numeric value is encountered between < >, it represents the integer type
-size used to hold the enumeration, in bits.
-
-enum name <integer_type OR size> {
+enum name <integer_type> {
   somestring          = start_value1 ... end_value1,
   "other string"      = start_value2 ... end_value2,
   yet_another_string,	/* will be assigned to end_value2 + 1 */
@@ -285,7 +282,7 @@ enum name <integer_type OR size> {
 If the values are omitted, the enumeration starts at 0 and increment of 1 for
 each entry:
 
-enum name <32> {
+enum name <unsigned int> {
   ZERO,
   ONE,
   TWO,
@@ -371,7 +368,7 @@ variant name {
 };
 
 struct {
-  enum <integer_type or size> { sel1, sel2, sel3, ... } tag_field;
+  enum <integer_type> { sel1, sel2, sel3, ... } tag_field;
   ...
   variant name <tag_field> v;
 }
@@ -380,7 +377,7 @@ An unnamed variant definition within a structure is expressed by the following
 metadata:
 
 struct {
-  enum <integer_type or size> { sel1, sel2, sel3, ... } tag_field;
+  enum <integer_type> { sel1, sel2, sel3, ... } tag_field;
   ...
   variant <tag_field> {
     field_type sel1;
@@ -940,7 +937,7 @@ variant name {
   ...
 };
 
-enum name <integer_type or size> {
+enum name <integer_type> {
   ...
 };
 
@@ -957,7 +954,7 @@ variant {
   ...
 }
 
-enum <integer_type or size> {
+enum <integer_type> {
   ...
 }
 
@@ -1338,9 +1335,6 @@ enum-specifier:
 	enum identifier-opt < declaration-specifiers > { enumerator-list }
 	enum identifier-opt < declaration-specifiers > { enumerator-list , }
 	enum identifier < declaration-specifiers >
-	enum identifier-opt < integer-constant > { enumerator-list }
-	enum identifier-opt < integer-constant > { enumerator-list , }
-	enum identifier < integer-constant >
 
 enumerator-list:
 	enumerator
