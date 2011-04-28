@@ -271,7 +271,7 @@ this format by having the same start_value and end_value for each element, which
 is in fact a range of size 1. This single-value range is supported without
 repeating the start and end values with the value = string declaration.
 
-enum name <integer_type> {
+enum name : integer_type {
   somestring          = start_value1 ... end_value1,
   "other string"      = start_value2 ... end_value2,
   yet_another_string,	/* will be assigned to end_value2 + 1 */
@@ -282,7 +282,7 @@ enum name <integer_type> {
 If the values are omitted, the enumeration starts at 0 and increment of 1 for
 each entry:
 
-enum name <unsigned int> {
+enum name : unsigned int {
   ZERO,
   ONE,
   TWO,
@@ -294,7 +294,7 @@ Overlapping ranges within a single enumeration are implementation defined.
 
 A nameless enumeration can be declared as a field type or as part of a typedef:
 
-enum <integer_type> {
+enum : integer_type {
   ...
 }
 
@@ -368,7 +368,7 @@ variant name {
 };
 
 struct {
-  enum <integer_type> { sel1, sel2, sel3, ... } tag_field;
+  enum : integer_type { sel1, sel2, sel3, ... } tag_field;
   ...
   variant name <tag_field> v;
 }
@@ -377,7 +377,7 @@ An unnamed variant definition within a structure is expressed by the following
 metadata:
 
 struct {
-  enum <integer_type> { sel1, sel2, sel3, ... } tag_field;
+  enum : integer_type { sel1, sel2, sel3, ... } tag_field;
   ...
   variant <tag_field> {
     field_type sel1;
@@ -396,14 +396,14 @@ variant example {
 };
 
 struct {
-  enum <uint2_t> { a, b, c } choice;
+  enum : uint2_t { a, b, c } choice;
   variant example <choice> v[unsigned int];
 }
 
 Example of an unnamed variant:
 
 struct {
-  enum <uint2_t> { a, b, c, d } choice;
+  enum : uint2_t { a, b, c, d } choice;
   /* Unrelated fields can be added between the variant and its tag */
   int32_t somevalue;
   variant <choice> {
@@ -420,7 +420,7 @@ struct {
 Example of an unnamed variant within an array:
 
 struct {
-  enum <uint2_t> { a, b, c } choice;
+  enum : uint2_t { a, b, c } choice;
   variant <choice> {
     uint32_t a;
     uint64_t b;
@@ -435,7 +435,7 @@ type definition referring to the tag "x" uses the closest preceding field from
 the lexical scope of the type definition.
 
 struct {
-  enum <uint2_t> { a, b, c, d } x;
+  enum : uint2_t { a, b, c, d } x;
 
   typedef variant <x> {	/*
 			 * "x" refers to the preceding "x" enumeration in the
@@ -447,9 +447,9 @@ struct {
   } example_variant;
 
   struct {
-    enum <int> { x, y, z } x;	/* This enumeration is not used by "v". */
+    enum : int { x, y, z } x;	/* This enumeration is not used by "v". */
     example_variant v; 		/*
-				 * "v" uses the "enum <uint2_t> { a, b, c, d }"
+				 * "v" uses the "enum : uint2_t { a, b, c, d }"
 				 * tag.
 				 */
   } a[10];
@@ -651,7 +651,7 @@ struct event_header_1 {
    * id: range: 0 - 30.
    * id 31 is reserved to indicate an extended header.
    */
-  enum <uint5_t> { compact = 0 ... 30, extended = 31 } id;
+  enum : uint5_t { compact = 0 ... 30, extended = 31 } id;
   variant <id> {
     struct {
       uint27_t timestamp;
@@ -679,7 +679,7 @@ struct event_header_2 {
    * id: range: 0 - 65534.
    * id 65535 is reserved to indicate an extended header.
    */
-  enum <uint16_t> { compact = 0 ... 65534, extended = 65535 } id;
+  enum : uint16_t { compact = 0 ... 65534, extended = 65535 } id;
   variant <id> {
     struct {
       uint32_t timestamp;
@@ -788,8 +788,9 @@ variant field), a declaration is followed by a declarator, which specify
 the newly defined type name (for typedef), or the field name (for
 declarations located within structure and variants). Array and sequence,
 declared with square brackets ("[" "]"), are part of the declarator,
-similarly to C99. The enumeration type specifier and variant tag name
-(both specified with "<" ">") are part of the type specifier.
+similarly to C99. The enumeration base type is specified by
+": base_type", which is part of the type specifier. The variant tag
+name, specified between "<" ">", is also part of the type specifier.
 
 A definition associates a type to a location in the event structure
 hierarchy (see Section 6). This association is denoted by ":=", as shown
@@ -937,7 +938,7 @@ variant name {
   ...
 };
 
-enum name <integer_type> {
+enum name : integer_type {
   ...
 };
 
@@ -954,7 +955,7 @@ variant {
   ...
 }
 
-enum <integer_type> {
+enum : integer_type {
   ...
 }
 
@@ -1332,9 +1333,8 @@ enum-specifier:
 	enum identifier-opt { enumerator-list }
 	enum identifier-opt { enumerator-list , }
 	enum identifier
-	enum identifier-opt < declaration-specifiers > { enumerator-list }
-	enum identifier-opt < declaration-specifiers > { enumerator-list , }
-	enum identifier < declaration-specifiers >
+	enum identifier-opt : declaration-specifiers { enumerator-list }
+	enum identifier-opt : declaration-specifiers { enumerator-list , }
 
 enumerator-list:
 	enumerator
