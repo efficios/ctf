@@ -186,7 +186,7 @@ typealias integer {
   size = 32;
   signed = false;
   align = 32;
-} : uint32_t;
+} typename uint32_t;
 
 Definition of a named 5-bit signed bitfield:
 
@@ -194,7 +194,7 @@ typealias integer {
   size = 5;
   signed = true;
   align = 1;
-} : int5_t;
+} typename int5_t;
 
 4.1.6 GNU/C bitfields
 
@@ -253,7 +253,7 @@ typealias floating_point {
   exp_dig = 8;         /* sizeof(float) * CHAR_BIT - FLT_MANT_DIG */
   mant_dig = 24;       /* FLT_MANT_DIG */
   byte_order = native;
-} : float;
+} typename float;
 
 TODO: define NaN, +inf, -inf behavior.
 
@@ -498,7 +498,7 @@ Metadata representation of a named string type:
 
 typealias string {
   encoding = UTF8 OR ASCII;
-} : name;
+} typename name;
 
 A nameless string type can be declared as a field type:
 
@@ -896,7 +896,7 @@ event {
  * Type declarations behave similarly to the C standard.
  */
 
-typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
+typedef aliased_type_specifiers new_type_declarators;
 
 /* e.g.: typedef struct example new_type_name[10]; */
 
@@ -904,15 +904,17 @@ typedef aliased_type_prefix aliased_type new_type aliased_type_postfix;
  * typealias
  *
  * The "typealias" declaration can be used to give a name (including
- * prefix/postfix) to a type. It should also be used to map basic C types
- * (float, int, unsigned long, ...) to a CTF type. Typealias is a superset of
- * "typedef": it also allows assignment of a simple variable identifier to a
- * type.
+ * pointer declarator specifier) to a type. It should also be used to
+ * map basic C types (float, int, unsigned long, ...) to a CTF type.
+ * Typealias is a superset of "typedef": it also allows assignment of a
+ * simple variable identifier to a type. The keyword "typename" is
+ * reserved to separate the aliased type from the newly declared alias
+ * name.
  */
 
 typealias type_class {
   ...
-} : new_type_prefix new_type new_type_postfix;
+} typename type_specifiers type_declarator;
 
 /*
  * e.g.: 
@@ -920,13 +922,13 @@ typealias type_class {
  *   size = 32;
  *   align = 32;
  *   signed = false;
- * } : struct page *;
+ * } typename struct page *;
  *
  * typealias integer {
  *  size = 32;
  *  align = 32;
  *  signed = true;
- * } : int;
+ * } typename int;
  */
 
 struct name {
@@ -1072,6 +1074,7 @@ struct
 trace
 typealias
 typedef
+typename
 unsigned
 variant
 void
@@ -1306,8 +1309,8 @@ struct-or-variant-declaration-list:
 struct-or-variant-declaration:
 	specifier-qualifier-list struct-or-variant-declarator-list ;
 	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list : declaration-specifiers abstract-declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list : declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list typename declaration-specifiers abstract-declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list typename declarator-list ;
 
 specifier-qualifier-list:
 	type-specifier specifier-qualifier-list-opt
@@ -1384,8 +1387,8 @@ ctf-specifier:
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
-	typealias declaration-specifiers abstract-declarator-list : declaration-specifiers abstract-declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list : declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list typename declaration-specifiers abstract-declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list typename declarator-list ;
 
 ctf-type-specifier:
 	floating_point { ctf-assignment-expression-list-opt }
@@ -1400,5 +1403,5 @@ ctf-assignment-expression:
 	unary-expression assignment-operator unary-expression
 	unary-expression type-assignment-operator type-specifier
 	declaration-specifiers storage-class-specifier declaration-specifiers declarator-list
-	typealias declaration-specifiers abstract-declarator-list : declaration-specifiers abstract-declarator-list
-	typealias declaration-specifiers abstract-declarator-list : declarator-list
+	typealias declaration-specifiers abstract-declarator-list typename declaration-specifiers abstract-declarator-list
+	typealias declaration-specifiers abstract-declarator-list typename declarator-list
