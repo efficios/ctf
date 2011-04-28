@@ -298,6 +298,16 @@ enum : integer_type {
   ...
 }
 
+Enumerations omitting the container type ": integer_type" use the "int"
+type (for compatibility with C99). The "int" type must be previously
+declared. E.g.:
+
+typealias integer { size = 32; align = 32; signed = true } := int;
+
+enum {
+  ...
+}
+
 
 4.2 Compound types
 
