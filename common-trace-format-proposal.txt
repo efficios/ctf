@@ -885,7 +885,6 @@ trace {
   major = value;				/* Trace format version */
   minor = value;
   uuid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";	/* Trace UUID */
-  word_size = value;
 };
 
 stream {
