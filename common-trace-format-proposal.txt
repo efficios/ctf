@@ -598,7 +598,7 @@ trace {
 };
 
 If a packet header lacks the "magic" number field, the trace endianness
-needs to be specified in the trace "endian" metadata attribute.
+needs to be specified in the trace "byte_order" metadata attribute.
 
 If the trace_uuid is not present, no validation that the metadata
 actually corresponds to the stream is performed.
@@ -903,7 +903,7 @@ TSDL Grammar. This section presents a rather ligher reading that
 consists in examples of TSDL metadata, with template values.
 
 Note that the trace endianness is usually extracted from the packet
-header magic number. The "endian" field is only needed when the magic
+header magic number. The "byte_order" field is only needed when the magic
 number packet header field is not present.
 
 The stream "id" can be left out if there is only one stream in the
@@ -914,7 +914,7 @@ trace {
   major = value;				/* Trace format version */
   minor = value;
   uuid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";	/* Trace UUID */
-  endian = big OR little;			/* Endianness (optional) */
+  byte_order = be OR le;			/* Endianness (optional) */
   packet.header := struct {
     uint32_t magic;
     uint8_t  trace_uuid[16];
