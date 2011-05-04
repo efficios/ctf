@@ -582,10 +582,19 @@ Metadata-defined layout (event packet context):
 
 5.1 Event Packet Header Fixed Layout Description
 
+The event packet header layout is indicated by the trace packet.header
+field. Here is an example structure type for the packet header with the
+fields typically expected:
+
 struct event_packet_header {
   uint32_t magic;
   uint8_t  trace_uuid[16];
   uint32_t stream_id;
+};
+
+trace {
+  ...
+  packet.header := struct event_packet_header;
 };
 
 5.2 Event Packet Context Description
@@ -885,6 +894,11 @@ trace {
   major = value;				/* Trace format version */
   minor = value;
   uuid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";	/* Trace UUID */
+  packet.header := struct {
+    uint32_t magic;
+    uint8_t  trace_uuid[16];
+    uint32_t stream_id;
+  };
 };
 
 stream {
