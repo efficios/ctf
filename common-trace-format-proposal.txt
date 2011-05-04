@@ -905,6 +905,10 @@ Note that the trace endianness is usually extracted from the packet
 header magic number. The "endian" field is only needed when the magic
 number packet header field is not present.
 
+The stream "id" can be left out if there is only one stream in the
+trace. The event "id" field can be left out if there is only one event
+in a stream.
+
 trace {
   major = value;				/* Trace format version */
   minor = value;
