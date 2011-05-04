@@ -876,6 +876,7 @@ The target dynamic scope must be specified explicitly when referring to
 a field outside of the local static scope. The dynamic scope prefixes
 are thus:
 
+ - Trace Packet Header: <trace.packet.header. >,
  - Stream Packet Context: <stream.packet.context. >,
  - Event Header: <stream.event.header. >,
  - Stream Event Context: <stream.event.context. >,
