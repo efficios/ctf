@@ -888,12 +888,17 @@ readable by accessing the upper dynamic scopes.
 
 The grammar representing the TSDL metadata is presented in Appendix C.
 TSDL Grammar. This section presents a rather ligher reading that
-consists in examples of TSDL metadata, with template values:
+consists in examples of TSDL metadata, with template values.
+
+Note that the trace endianness is usually extracted from the packet
+header magic number. The "endian" field is only needed when the magic
+number packet header field is not present.
 
 trace {
   major = value;				/* Trace format version */
   minor = value;
   uuid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";	/* Trace UUID */
+  endian = big OR little;			/* Endianness (optional) */
   packet.header := struct {
     uint32_t magic;
     uint8_t  trace_uuid[16];
