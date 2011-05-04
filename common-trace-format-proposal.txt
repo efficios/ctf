@@ -547,7 +547,7 @@ Metadata-defined layout (event packet context):
   header.
 - Per-stream event packet sequence count (to deal with UDP packet loss). The
   number of significant sequence counter bits should also be present, so
-  wrap-arounds are deal with correctly.
+  wrap-arounds are dealt with correctly.
 - Timestamp at the beginning and timestamp at the end of the event packet.
   Both timestamps are written in the packet header, but sampled respectively
   while (or before) writing the first event and while (or after) writing the
