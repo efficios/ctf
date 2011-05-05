@@ -604,8 +604,9 @@ don't need to declare a "stream_id" field.
 5.2 Event Packet Context Description
 
 Event packet context example. These are declared within the stream declaration
-in the metadata. All these fields are optional except for "content_size" and
-"packet_size", which must be present in the context.
+in the metadata. All these fields are optional. If the packet size field is
+missing, the whole stream only contains a single packet. If the content
+size field is missing, the packet is filled (no padding).
 
 An example event packet context type:
 
