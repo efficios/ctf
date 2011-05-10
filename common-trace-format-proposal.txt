@@ -935,7 +935,7 @@ readable by accessing the upper dynamic scopes.
 7.4 TSDL Examples
 
 The grammar representing the TSDL meta-data is presented in Appendix C.
-TSDL Grammar. This section presents a rather ligher reading that
+TSDL Grammar. This section presents a rather lighter reading that
 consists in examples of TSDL meta-data, with template values.
 
 The stream "id" can be left out if there is only one stream in the
