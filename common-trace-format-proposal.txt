@@ -53,28 +53,31 @@ virtual file system. Because each event stream is appended to while a trace is
 being recorded, each is associated with a separate file for output.  Therefore,
 a stored trace can be represented as a directory containing one file per stream.
 
-A metadata event stream contains information on trace event types
-expressed in the Trace Stream Description Language (TSDL). It describes:
+Meta-data description associated with the trace contains information on
+trace event types expressed in the Trace Stream Description Language
+(TSDL). This language describes:
 
 - Trace version.
 - Types available.
+- Per-trace event header description.
 - Per-stream event header description.
-- Per-stream event header selection.
-- Per-stream event context fields.
+- Per-stream event context description.
 - Per-event
   - Event type to stream mapping.
   - Event type to name mapping.
   - Event type to ID mapping.
+  - Event context description.
   - Event fields description.
 
 
 3. Event stream
 
-An event stream is divided in contiguous event packets of variable size. These
-subdivisions have a variable size. An event packet can contain a certain
-amount of padding at the end. The stream header is repeated at the
-beginning of each event packet. The rationale for the event stream
-design choices is explained in Appendix B. Stream Header Rationale.
+An event stream can be divided into contiguous event packets of variable
+size. These subdivisions have a variable size. An event packet can
+contain a certain amount of padding at the end. The stream header is
+repeated at the beginning of each event packet. The rationale for the
+event stream design choices is explained in Appendix B. Stream Header
+Rationale.
 
 The event stream header will therefore be referred to as the "event packet
 header" throughout the rest of this document.
@@ -104,16 +107,19 @@ We define "byte-packed" types as aligned on the byte size, namely 8-bit.
 We define "bit-packed" types as following on the next bit, as defined by the
 "Integers" section.
 
-All basic types, except bitfields, are either aligned on an architecture-defined
-specific alignment or byte-packed, depending on the architecture preference.
-Architectures providing fast unaligned write byte-packed basic types to save
-space, aligning each type on byte boundaries (8-bit). Architectures with slow
-unaligned writes align types on specific alignment values. If no specific
+Each basic type must specify its alignment, in bits. Examples of
+possible alignments are: bit-packed, byte-packed, or word-aligned. The
+choice depends on the architecture preference and compactness vs
+performance trade-offs of the implementation.  Architectures providing
+fast unaligned write byte-packed basic types to save space, aligning
+each type on byte boundaries (8-bit). Architectures with slow unaligned
+writes align types on specific alignment values. If no specific
 alignment is declared for a type, it is assumed to be bit-packed for
 integers with size not multiple of 8 bits and for gcc bitfields. All
-other types are byte-packed.
+other types are byte-packed. It is however recommended to always specify
+the alignment explicitly.
 
-Metadata attribute representation of a specific alignment:
+TSDL meta-data attribute representation of a specific alignment:
 
   align = value;                                /* value in bits */
 
@@ -125,7 +131,7 @@ attribute. Typical use-case is to specify the network byte order (big endian:
 "be") to save data captured from the network into the trace without conversion.
 If not specified, the byte order is native.
 
-Metadata representation:
+TSDL meta-data representation:
 
   byte_order = native OR network OR be OR le;	/* network and be are aliases */
 
@@ -136,20 +142,21 @@ multiplied by CHAR_BIT.
 We require the size of "char" and "unsigned char" types (CHAR_BIT) to be fixed
 to 8 bits for cross-endianness compatibility.
 
-Metadata representation:
+TSDL meta-data representation:
 
   size = value;    (value is in bits)
 
 4.1.5 Integers
 
-Signed integers are represented in two-complement. Integer alignment, size,
-signedness and byte ordering are defined in the metadata. Integers aligned on
-byte size (8-bit) and with length multiple of byte size (8-bit) correspond to
-the C99 standard integers. In addition, integers with alignment and/or size that
-are _not_ a multiple of the byte size are permitted; these correspond to the C99
-standard bitfields, with the added specification that the CTF integer bitfields
-have a fixed binary representation. A MIT-licensed reference implementation of
-the CTF portable bitfields is available at:
+Signed integers are represented in two-complement. Integer alignment,
+size, signedness and byte ordering are defined in the TSDL meta-data.
+Integers aligned on byte size (8-bit) and with length multiple of byte
+size (8-bit) correspond to the C99 standard integers. In addition,
+integers with alignment and/or size that are _not_ a multiple of the
+byte size are permitted; these correspond to the C99 standard bitfields,
+with the added specification that the CTF integer bitfields have a fixed
+binary representation. A MIT-licensed reference implementation of the
+CTF portable bitfields is available at:
 
   http://git.efficios.com/?p=babeltrace.git;a=blob;f=include/babeltrace/bitfield.h
 
@@ -171,10 +178,10 @@ Binary representation of integers:
 
 This binary representation is derived from the bitfield implementation in GCC
 for little and big endian. However, contrary to what GCC does, integers can
-cross units boundaries (no padding is required). Padding can be explicitely
+cross units boundaries (no padding is required). Padding can be explicitly
 added (see 4.1.6 GNU/C bitfields) to follow the GCC layout if needed.
 
-Metadata representation:
+TSDL meta-data representation:
 
   integer {
     signed = true OR false;                     /* default false */
@@ -206,7 +213,7 @@ particularity on alignment: if a bitfield cannot fit in the current unit, the
 unit is padded and the bitfield starts at the following unit. The unit size is
 defined by the size of the type "unit_type".
 
-Metadata representation:
+TSDL meta-data representation:
 
   unit_type name:size:
 
@@ -223,7 +230,7 @@ the current unit.
 
 4.1.7 Floating point
 
-The floating point values byte ordering is defined in the metadata.
+The floating point values byte ordering is defined in the TSDL meta-data.
 
 Floating point values follow the IEEE 754-2008 standard interchange formats.
 Description of the floating point values include the exponent and mantissa size
@@ -242,7 +249,7 @@ in bits. Some requirements are imposed on the floating point values:
   - sizeof(double) * CHAR_BIT - DBL_MANT_DIG
   - sizeof(long double) * CHAR_BIT - LDBL_MANT_DIG
 
-Metadata representation:
+TSDL meta-data representation:
 
 floating_point {
    exp_dig = value;
@@ -264,9 +271,9 @@ TODO: define NaN, +inf, -inf behavior.
 
 Enumerations are a mapping between an integer type and a table of strings. The
 numerical representation of the enumeration follows the integer type specified
-by the metadata. The enumeration mapping table is detailed in the enumeration
-description within the metadata. The mapping table maps inclusive value ranges
-(or single values) to strings. Instead of being limited to simple
+by the meta-data. The enumeration mapping table is detailed in the enumeration
+description within the meta-data. The mapping table maps inclusive value
+ranges (or single values) to strings. Instead of being limited to simple
 "value -> string" mappings, these enumerations map
 "[ start_value ... end_value ] -> string", which map inclusive ranges of
 values to strings.  An enumeration from the C language can be represented in
@@ -322,7 +329,7 @@ structures, variant, arrays, sequences, and strings.
 Structures are aligned on the largest alignment required by basic types
 contained within the structure. (This follows the ISO/C standard for structures)
 
-Metadata representation of a named structure:
+TSDL meta-data representation of a named structure:
 
 struct name {
   field_type field_name;
@@ -338,7 +345,7 @@ struct example {
     signed = true;
     align = 16;
   } first_field_name;
-  uint64_t second_field_name;  /* Named type declared in the metadata */
+  uint64_t second_field_name;  /* Named type declared in the meta-data */
 };
 
 The fields are placed in a sequence next to each other. They each possess a
@@ -387,7 +394,7 @@ struct {
 }
 
 An unnamed variant definition within a structure is expressed by the following
-metadata:
+TSDL meta-data:
 
 struct {
   enum : integer_type { sel1, sel2, sel3, ... } tag_field;
@@ -470,12 +477,13 @@ struct {
 
 4.2.3 Arrays
 
-Arrays are fixed-length. Their length is declared in the type declaration within
-the metadata. They contain an array of "inner type" elements, which can refer to
-any type not containing the type of the array being declared (no circular
-dependency). The length is the number of elements in an array.
+Arrays are fixed-length. Their length is declared in the type
+declaration within the meta-data. They contain an array of "inner type"
+elements, which can refer to any type not containing the type of the
+array being declared (no circular dependency). The length is the number
+of elements in an array.
 
-Metadata representation of a named array:
+TSDL meta-data representation of a named array:
 
 typedef elem_type name[length];
 
@@ -490,7 +498,7 @@ Sequences are dynamically-sized arrays. They start with an integer that specify
 the length of the sequence, followed by an array of "inner type" elements.
 The length is the number of elements in the sequence.
 
-Metadata representation for a named sequence:
+TSDL meta-data representation for a named sequence:
 
 typedef elem_type name[length_type];
 
@@ -504,10 +512,11 @@ elements follow the "array" specifications.
 4.2.5 Strings
 
 Strings are an array of bytes of variable size and are terminated by a '\0'
-"NULL" character.  Their encoding is described in the metadata. In absence of
-encoding attribute information, the default encoding is UTF-8.
+"NULL" character.  Their encoding is described in the TSDL meta-data. In
+absence of encoding attribute information, the default encoding is
+UTF-8.
 
-Metadata representation of a named string type:
+TSDL meta-data representation of a named string type:
 
 typealias string {
   encoding = UTF8 OR ASCII;
@@ -519,27 +528,27 @@ string field_name;	/* Use default UTF8 encoding */
 
 5. Event Packet Header
 
-The event packet header consists of two part: one is mandatory and have a fixed
-layout. The second part, the "event packet context", has its layout described in
-the metadata.
+The event packet header consists of two parts: the "event packet header"
+is the same for all streams of a trace. The second part, the "event
+packet context", is described on a per-stream basis. Both are described
+in the TSDL meta-data. The packets are aligned on architecture-page-sized
+addresses.
 
-- Aligned on page size. Fixed size. Fields either aligned or packed (depending
-  on the architecture preference).
-  No padding at the end of the event packet header. Native architecture byte
-  ordering.
+Event packet header (all fields are optional, specified by TSDL meta-data):
 
-Fixed layout (event packet header):
+- Magic number (CTF magic number: 0xC1FC1FC1) specifies that this is a
+  CTF packet. This magic number is optional, but when present, it should
+  come at the very beginning of the packet.
+- Trace UUID, used to ensure the event packet match the meta-data used.
+  (note: we cannot use a meta-data checksum in every cases instead of a
+   UUID because meta-data can be appended to while tracing is active)
+  This field is optional.
+- Stream ID, used as reference to stream description in meta-data.
+  This field is optional if there is only one stream description in the
+  meta-data, but becomes required if there are more than one stream in
+  the TSDL meta-data description.
 
-- Magic number (CTF magic number: 0xC1FC1FC1 This magic number specifies
-  that we use the CTF metadata description language described in this
-  document. Different magic numbers should be used for other metadata
-  description languages.
-- Trace UUID, used to ensure the event packet match the metadata used.
-  (note: we cannot use a metadata checksum because metadata can be appended to
-   while tracing is active)
-- Stream ID, used as reference to stream description in metadata.
-
-Metadata-defined layout (event packet context):
+Event packet context (all fields are optional, specified by TSDL meta-data):
 
 - Event packet content size (in bytes).
 - Event packet size (in bytes, includes padding).
@@ -548,7 +557,7 @@ Metadata-defined layout (event packet context):
 - Per-stream event packet sequence count (to deal with UDP packet loss). The
   number of significant sequence counter bits should also be present, so
   wrap-arounds are dealt with correctly.
-- Timestamp at the beginning and timestamp at the end of the event packet.
+- Time-stamp at the beginning and time-stamp at the end of the event packet.
   Both timestamps are written in the packet header, but sampled respectively
   while (or before) writing the first event and while (or after) writing the
   last event in the packet. The inclusive range between these timestamps should
@@ -576,11 +585,11 @@ Metadata-defined layout (event packet context):
   2: sha1
   3: crc32
 
-5.1 Event Packet Header Fixed Layout Description
+5.1 Event Packet Header Description
 
 The event packet header layout is indicated by the trace packet.header
-field. Here is an example structure type for the packet header with the
-fields typically expected:
+field. Here is a recommended structure type for the packet header with
+the fields typically expected (although these fields are each optional):
 
 struct event_packet_header {
   uint32_t magic;
@@ -593,7 +602,10 @@ trace {
   packet.header := struct event_packet_header;
 };
 
-If the trace_uuid is not present, no validation that the metadata
+If the magic number is not present, tools such as "file" will have no
+mean to discover the file type.
+
+If the trace_uuid is not present, no validation that the meta-data
 actually corresponds to the stream is performed.
 
 If the stream_id packet header field is missing, the trace can only
@@ -604,7 +616,7 @@ don't need to declare a "stream_id" field.
 5.2 Event Packet Context Description
 
 Event packet context example. These are declared within the stream declaration
-in the metadata. All these fields are optional. If the packet size field is
+in the meta-data. All these fields are optional. If the packet size field is
 missing, the whole stream only contains a single packet. If the content
 size field is missing, the packet is filled (no padding). The content
 and packet sizes include all headers.
@@ -631,11 +643,11 @@ struct event_packet_context {
 
 The overall structure of an event is:
 
-1 - Stream Packet Context (as specified by the stream metadata)
- 2 - Event Header (as specified by the stream metadata)
-  3 - Stream Event Context (as specified by the stream metadata)
-   4 - Event Context (as specified by the event metadata)
-    5 - Event Payload (as specified by the event metadata)
+1 - Stream Packet Context (as specified by the stream meta-data)
+ 2 - Event Header (as specified by the stream meta-data)
+  3 - Stream Event Context (as specified by the stream meta-data)
+   4 - Event Context (as specified by the event meta-data)
+    5 - Event Payload (as specified by the event meta-data)
 
 This structure defines an implicit dynamic scoping, where variants
 located in inner structures (those with a higher number in the listing
@@ -644,7 +656,7 @@ the listing above). See Section 7.3 TSDL Scopes for more detail.
 
 6.1 Event Header
 
-Event headers can be described within the metadata. We hereby propose, as an
+Event headers can be described within the meta-data. We hereby propose, as an
 example, two types of events headers. Type 1 accommodates streams with less than
 31 event IDs. Type 2 accommodates streams with 31 or more event IDs.
 
@@ -652,8 +664,8 @@ One major factor can vary between streams: the number of event IDs assigned to
 a stream. Luckily, this information tends to stay relatively constant (modulo
 event registration while trace is being recorded), so we can specify different
 representations for streams containing few event IDs and streams containing
-many event IDs, so we end up representing the event ID and timestamp as densely
-as possible in each case.
+many event IDs, so we end up representing the event ID and time-stamp as
+densely as possible in each case.
 
 The header is extended in the rare occasions where the information cannot be
 represented in the ranges available in the standard event header. They are also
@@ -661,8 +673,14 @@ used in the rare occasions where the data required for a field could not be
 collected: the flag corresponding to the missing field within the missing_fields
 array is then set to 1.
 
-Types uintX_t represent an X-bit unsigned integer.
+Types uintX_t represent an X-bit unsigned integer, as declared with
+either:
 
+  typealias integer { size = X; align = X; signed = false } := uintX_t;
+
+    or
+
+  typealias integer { size = X; align = 1; signed = false } := uintX_t;
 
 6.1.1 Type 1 - Few event IDs
 
@@ -722,26 +740,23 @@ struct event_header_2 {
 
 6.2 Event Context
 
-The event context contains information relative to the current event. The choice
-and meaning of this information is specified by the metadata "stream" and
-"event" information. The "stream" context is applied to all events within the
-stream. The "stream" context structure follows the event header. The "event"
-context is applied to specific events. Its structure follows the "stream"
-context stucture.
+The event context contains information relative to the current event.
+The choice and meaning of this information is specified by the TSDL
+stream and event meta-data descriptions. The stream context is applied
+to all events within the stream. The stream context structure follows
+the event header. The event context is applied to specific events. Its
+structure follows the stream context structure.
 
 An example of stream-level event context is to save the event payload size with
 each event, or to save the current PID with each event.  These are declared
-within the stream declaration within the metadata:
+within the stream declaration within the meta-data:
 
   stream {
     ...
-    event {
-      ...
-      context := struct {
+    event.context := struct {
         uint pid;
         uint16_t payload_size;
-      };
-    }
+    };
   };
 
 An example of event-specific event context is to declare a bitmap of missing
@@ -764,7 +779,7 @@ numeric value).
 6.3 Event Payload
 
 An event payload contains fields specific to a given event type. The fields
-belonging to an event type are described in the event-specific metadata
+belonging to an event type are described in the event-specific meta-data
 within a structure type.
 
 6.3.1 Padding
@@ -792,28 +807,54 @@ binary trace streams layout in a C99-like Domain Specific Language
 (DSL).
 
 
-7.1 Metadata
+7.1 Meta-data
 
 The trace stream layout description is located in the trace meta-data.
 The meta-data is itself located in a stream identified by its name:
 "metadata".
 
-It is made of "event packets", which each start with an event packet
-header. The event type within the metadata stream have no event header
-nor event context. Each event only contains a "string" payload without
-any null-character. The events are packed one next to another. Each
-event packet start with an event packet header, which contains, amongst
-other fields, the magic number, trace UUID and packet length. In the
-event packet header, the trace UUID is represented as an array of bytes.
-Within the string-based metadata description, the trace UUID is
-represented as a string of hexadecimal digits and dashes "-".
+The meta-data description can be expressed in two different formats:
+text-only and packet-based. The text-only description facilitates
+generation of meta-data and provides a convenient way to enter the
+meta-data information by hand. The packet-based meta-data provides the
+CTF stream packet facilities (checksumming, compression, encryption,
+network-readiness) for meta-data stream generated and transported by a
+tracer.
 
-The metadata can be parsed by reading characters within the metadata
-stream, for each packet starting after the packet header, for the length
-of the packet payload specified in the header.  Text contained within
-"/*" and "*/", as well as within "//" and end of line, are treated as
-comments.  Boolean values can be represented as true, TRUE, or 1 for
-true, and false, FALSE, or 0 for false.
+The text-only meta-data file is a plain text TSDL description.
+
+The packet-based meta-data is made of "meta-data packets", which each
+start with a meta-data packet header. The packet-based meta-data
+description is detected by reading the magic number "0x75D11D57" at the
+beginning of the file. This magic number is also used to detect the
+endianness of the architecture by trying to read the CTF magic number
+and its counterpart in reversed endianness. The events within the
+meta-data stream have no event header nor event context. Each event only
+contains a "string" payload. Each meta-data packet start with a special
+packet header, specific to the meta-data stream, which contains,
+exactly:
+
+struct metadata_packet_header {
+  uint32_t magic;			/* 0x3FF1C105 */
+  uint8_t  trace_uuid[16];		/* Unique Universal Identifier */
+  uint32_t checksum;			/* 0 if unused */
+  uint32_t content_size;		/* in bits */
+  uint32_t packet_size;			/* in bits */
+  uint8_t  compression_scheme;		/* 0 if unused */
+  uint8_t  encryption_scheme;		/* 0 if unused */
+  uint8_t  checksum_scheme;		/* 0 if unused */
+};
+
+The packet-based meta-data can be converted to a text-only meta-data by
+concatenating all the strings in contains.
+
+In the textual representation of the meta-data, the text contained
+within "/*" and "*/", as well as within "//" and end of line, are
+treated as comments.  Boolean values can be represented as true, TRUE,
+or 1 for true, and false, FALSE, or 0 for false. Within the string-based
+meta-data description, the trace UUID is represented as a string of
+hexadecimal digits and dashes "-". In the event packet header, the trace
+UUID is represented as an array of bytes.
 
 
 7.2 Declaration vs Definition
@@ -893,9 +934,9 @@ readable by accessing the upper dynamic scopes.
 
 7.4 TSDL Examples
 
-The grammar representing the TSDL metadata is presented in Appendix C.
+The grammar representing the TSDL meta-data is presented in Appendix C.
 TSDL Grammar. This section presents a rather ligher reading that
-consists in examples of TSDL metadata, with template values.
+consists in examples of TSDL meta-data, with template values.
 
 The stream "id" can be left out if there is only one stream in the
 trace. The event "id" field can be left out if there is only one event
@@ -1071,9 +1112,6 @@ flexibility in terms of:
     or asking for re-transmission.
   - transparently support flight recorder mode,
   - transparently support crash dump.
-
-The event stream header will therefore be referred to as the "event packet
-header" throughout the rest of this document.
 
 
 C. TSDL Grammar
