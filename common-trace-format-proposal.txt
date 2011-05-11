@@ -1248,10 +1248,6 @@ long-long-suffix:
 	ll
 	LL
 
-hexadecimal-digit-sequence:
-	hexadecimal-digit
-	hexadecimal-digit-sequence hexadecimal-digit
-
 enumeration-constant:
 	identifier
 	string-literal
