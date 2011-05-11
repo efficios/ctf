@@ -1248,10 +1248,6 @@ long-long-suffix:
 	ll
 	LL
 
-digit-sequence:
-	digit
-	digit-sequence digit
-
 hexadecimal-digit-sequence:
 	hexadecimal-digit
 	hexadecimal-digit-sequence hexadecimal-digit
