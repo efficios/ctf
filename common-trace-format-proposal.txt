@@ -835,7 +835,7 @@ packet header, specific to the meta-data stream, which contains,
 exactly:
 
 struct metadata_packet_header {
-  uint32_t magic;			/* 0x3FF1C105 */
+  uint32_t magic;			/* 0x75D11D57 */
   uint8_t  trace_uuid[16];		/* Unique Universal Identifier */
   uint32_t checksum;			/* 0 if unused */
   uint32_t content_size;		/* in bits */
