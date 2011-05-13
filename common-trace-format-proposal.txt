@@ -108,16 +108,18 @@ We define "bit-packed" types as following on the next bit, as defined by the
 "Integers" section.
 
 Each basic type must specify its alignment, in bits. Examples of
-possible alignments are: bit-packed, byte-packed, or word-aligned. The
-choice depends on the architecture preference and compactness vs
-performance trade-offs of the implementation.  Architectures providing
-fast unaligned write byte-packed basic types to save space, aligning
-each type on byte boundaries (8-bit). Architectures with slow unaligned
-writes align types on specific alignment values. If no specific
-alignment is declared for a type, it is assumed to be bit-packed for
-integers with size not multiple of 8 bits and for gcc bitfields. All
-other types are byte-packed. It is however recommended to always specify
-the alignment explicitly.
+possible alignments are: bit-packed (align = 1), byte-packed (align =
+8), or word-aligned (e.g. align = 32 or align = 64). The choice depends
+on the architecture preference and compactness vs performance trade-offs
+of the implementation.  Architectures providing fast unaligned write
+byte-packed basic types to save space, aligning each type on byte
+boundaries (8-bit). Architectures with slow unaligned writes align types
+on specific alignment values. If no specific alignment is declared for a
+type, it is assumed to be bit-packed for integers with size not multiple
+of 8 bits and for gcc bitfields. All other basic types are byte-packed
+by default. It is however recommended to always specify the alignment
+explicitly. Alignment values must be power of two. Compound types are
+aligned as specified in their individual specification.
 
 TSDL meta-data attribute representation of a specific alignment:
 
@@ -252,9 +254,10 @@ in bits. Some requirements are imposed on the floating point values:
 TSDL meta-data representation:
 
 floating_point {
-   exp_dig = value;
-   mant_dig = value;
-   byte_order = native OR network OR be OR le;
+  exp_dig = value;
+  mant_dig = value;
+  byte_order = native OR network OR be OR le;
+  align = value;
 }
 
 Example of type inheritance:
@@ -263,9 +266,13 @@ typealias floating_point {
   exp_dig = 8;         /* sizeof(float) * CHAR_BIT - FLT_MANT_DIG */
   mant_dig = 24;       /* FLT_MANT_DIG */
   byte_order = native;
+  align = 32;
 } := float;
 
 TODO: define NaN, +inf, -inf behavior.
+
+Bit-packed, byte-packed or larger alignments can be used for floating
+point values, similarly to integers.
 
 4.1.8 Enumerations
 
@@ -356,6 +363,17 @@ A nameless structure can be declared as a field type or as part of a typedef:
 struct {
   ...
 }
+
+Alignment for a structure compound type can be forced to a minimum value
+by adding an "align" specifier after the declaration of a structure
+body. This attribute is read as: align(value). The value is specified in
+bits. The structure will be aligned on the maximum value between this
+attribute and the alignment required by the basic types contained within
+the structure. e.g.
+
+struct {
+  ...
+} align(32)
 
 4.2.2 Variants (Discriminated/Tagged Unions)
 
@@ -491,6 +509,7 @@ A nameless array can be declared as a field type within a structure, e.g.:
 
   uint8_t field_name[10];
 
+Arrays are always aligned on their element alignment requirement.
 
 4.2.4 Sequences
 
@@ -525,6 +544,8 @@ typealias string {
 A nameless string type can be declared as a field type:
 
 string field_name;	/* Use default UTF8 encoding */
+
+Strings are always aligned on byte size.
 
 5. Event Packet Header
 
@@ -1040,6 +1061,10 @@ struct {
   ...
 }
 
+struct {
+  ...
+} align(value)
+
 variant {
   ...
 }
@@ -1145,6 +1170,7 @@ token:
 
 keyword: is one of
 
+align
 const
 char
 double
@@ -1378,9 +1404,12 @@ type-specifier:
 	typedef-name
 	ctf-type-specifier
 
+align-attribute:
+	align ( constant-expression )
+
 struct-specifier:
-	struct identifier-opt { struct-or-variant-declaration-list-opt }
-	struct identifier
+	struct identifier-opt { struct-or-variant-declaration-list-opt } align-attribute-opt
+	struct identifier align-attribute-opt
 
 struct-or-variant-declaration-list:
 	struct-or-variant-declaration
