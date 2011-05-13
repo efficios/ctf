@@ -969,7 +969,7 @@ stream {
 event {
   name = event_name;
   id = value;			/* Numeric identifier within the stream */
-  stream = stream_id;
+  stream_id = stream_id;
   context := struct {
     ...
   };
