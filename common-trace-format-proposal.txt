@@ -190,6 +190,9 @@ TSDL meta-data representation:
     byte_order = native OR network OR be OR le; /* default native */
     size = value;                               /* value in bits, no default */
     align = value;                              /* value in bits */
+    /* based used for pretty-printing output, default: decimal. */
+    base = decimal OR dec OR OR d OR i OR u OR 10 OR hexadecimal OR hex OR x OR X OR p OR 16
+           OR octal OR oct OR o OR 8 OR binary OR b OR 2;
   }
 
 Example of type inheritance (creation of a uint32_t named type):
