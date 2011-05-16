@@ -936,7 +936,8 @@ in Section 7.3.
 
 TSDL uses two different types of scoping: a lexical scope is used for
 declarations and type definitions, and a dynamic scope is used for
-variants references to tag fields.
+variants references to tag fields and for sequence references to length
+fields.
 
 7.3.1 Lexical Scope
 
@@ -953,16 +954,17 @@ typedef or typealias is allowed within a sub-scope.
 
 A dynamic scope consists in the lexical scope augmented with the
 implicit event structure definition hierarchy presented at Section 6.
-The dynamic scope is only used for variant tag definitions. It is used
-at definition time to look up the location of the tag field associated
-with a variant.
+The dynamic scope is used for variant tag and sequence length
+definitions. It is used at definition time to look up the location of
+the tag field associated with a variant, and to lookup up the location
+of the length field associated with a sequence.
 
-Therefore, variants in lower levels in the dynamic scope (e.g. event
-context) can refer to a tag field located in upper levels (e.g. in the
-event header) by specifying, in this case, the associated tag with
-<header.field_name>. This allows, for instance, the event context to
-define a variant referring to the "id" field of the event header as
-selector.
+Therefore, variants (or sequences) in lower levels in the dynamic scope
+(e.g. event context) can refer to a tag (or length) field located in
+upper levels (e.g. in the event header) by specifying, in this case, the
+associated tag with <header.field_name>. This allows, for instance, the
+event context to define a variant referring to the "id" field of the
+event header as selector.
 
 The target dynamic scope must be specified explicitly when referring to
 a field outside of the local static scope. The dynamic scope prefixes
