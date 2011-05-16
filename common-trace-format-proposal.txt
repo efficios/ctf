@@ -886,9 +886,12 @@ beginning of the file. This magic number is also used to detect the
 endianness of the architecture by trying to read the CTF magic number
 and its counterpart in reversed endianness. The events within the
 meta-data stream have no event header nor event context. Each event only
-contains a "string" payload. Each meta-data packet start with a special
-packet header, specific to the meta-data stream, which contains,
-exactly:
+contains a "sequence" payload, which is a sequence of bits using the
+"trace.packet.header.content_size" field as a placeholder for its
+length. The formatting of this sequence of bits is a plain-text
+representation of the TSDL description. Each meta-data packet start with
+a special packet header, specific to the meta-data stream, which
+contains, exactly:
 
 struct metadata_packet_header {
   uint32_t magic;			/* 0x75D11D57 */
