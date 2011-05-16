@@ -1392,11 +1392,8 @@ assignment-operator:
 type-assignment-operator:
 	:=
 
-constant-expression:
-	unary-expression
-
 constant-expression-range:
-	constant-expression ... constant-expression
+	unary-expression ... unary-expression
 
 2.2) Declarations:
 
@@ -1440,7 +1437,7 @@ type-specifier:
 	ctf-type-specifier
 
 align-attribute:
-	align ( constant-expression )
+	align ( unary-expression )
 
 struct-specifier:
 	struct identifier-opt { struct-or-variant-declaration-list-opt } align-attribute-opt
@@ -1466,7 +1463,7 @@ struct-or-variant-declarator-list:
 
 struct-or-variant-declarator:
 	declarator
-	declarator-opt : constant-expression
+	declarator-opt : unary-expression
 
 variant-specifier:
 	variant identifier-opt variant-tag-opt { struct-or-variant-declaration-list }
@@ -1488,7 +1485,7 @@ enumerator-list:
 
 enumerator:
 	enumeration-constant
-	enumeration-constant = constant-expression
+	enumeration-constant = unary-expression
 	enumeration-constant = constant-expression-range
 
 type-qualifier:
@@ -1501,7 +1498,6 @@ direct-declarator:
 	identifier
 	( declarator )
 	direct-declarator [ unary-expression ]
-	direct-declarator [ constant-expression ]
 
 abstract-declarator:
 	pointer-opt direct-abstract-declarator
@@ -1510,7 +1506,6 @@ direct-abstract-declarator:
 	identifier-opt
 	( abstract-declarator )
 	direct-abstract-declarator [ unary-expression ]
-	direct-abstract-declarator [ constant-expression ]
 	direct-abstract-declarator [ ]
 
 pointer:
