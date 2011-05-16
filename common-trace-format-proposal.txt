@@ -384,11 +384,11 @@ A CTF variant is a selection between different types. A CTF variant must
 always be defined within the scope of a structure or within fields
 contained within a structure (defined recursively). A "tag" enumeration
 field must appear in either the same lexical scope, prior to the variant
-field (in field declaration order), in an uppermost lexical scope (see
-Section 7.3.1), or in an uppermost dynamic scope (see Section 7.3.2).
-The type selection is indicated by the mapping from the enumeration
-value to the string used as variant type selector. The field to use as
-tag is specified by the "tag_field", specified between "< >" after the
+field (in field declaration order), in an upper lexical scope (see
+Section 7.3.1), or in an upper dynamic scope (see Section 7.3.2). The
+type selection is indicated by the mapping from the enumeration value to
+the string used as variant type selector. The field to use as tag is
+specified by the "tag_field", specified between "< >" after the
 "variant" keyword for unnamed variants, and after "variant name" for
 named variants.
 
@@ -438,7 +438,8 @@ variant example {
 
 struct {
   enum : uint2_t { a, b, c } choice;
-  variant example <choice> v[unsigned int];
+  unsigned int seqlen;
+  variant example <choice> v[seqlen];
 }
 
 Example of an unnamed variant:
@@ -516,20 +517,51 @@ Arrays are always aligned on their element alignment requirement.
 
 4.2.4 Sequences
 
-Sequences are dynamically-sized arrays. They start with an integer that specify
-the length of the sequence, followed by an array of "inner type" elements.
-The length is the number of elements in the sequence.
+Sequences are dynamically-sized arrays. They refer to a a "length"
+unsigned integer field, which must appear in either the same lexical scope,
+prior to the sequence field (in field declaration order), in an upper
+lexical scope (see Section 7.3.1), or in an upper dynamic scope (see
+Section 7.3.2). This length field represents the number of elements in
+the sequence. The sequence per se is an array of "inner type" elements.
 
-TSDL meta-data representation for a named sequence:
+TSDL meta-data representation for a sequence type definition:
 
-typedef elem_type name[length_type];
+struct {
+  unsigned int length_field;
+  typedef elem_type typename[length_field];
+  typename seq_field_name;
+}
 
-A nameless sequence can be declared as a field type, e.g.:
+A sequence can also be declared as a field type, e.g.:
 
-long field_name[int];
+struct {
+  unsigned int length_field;
+  long seq_field_name[length_field];
+}
 
-The length type follows the integer types specifications, and the sequence
-elements follow the "array" specifications.
+Multiple sequences can refer to the same length field, and these length
+fields can be in a different upper dynamic scope:
+
+e.g., assuming the stream.event.header defines:
+
+stream {
+  ...
+  id = 1;
+  event.header := struct {
+    uint16_t seq_len;
+  };
+};
+
+event {
+  ...
+  stream_id = 1;
+  fields := struct {
+    long seq_a[stream.event.header.seq_len];
+    char seq_b[stream.event.header.seq_len];
+  };
+};
+
+The sequence elements follow the "array" specifications.
 
 4.2.5 Strings
 
@@ -1468,7 +1500,7 @@ declarator:
 direct-declarator:
 	identifier
 	( declarator )
-	direct-declarator [ type-specifier ]
+	direct-declarator [ unary-expression ]
 	direct-declarator [ constant-expression ]
 
 abstract-declarator:
@@ -1477,7 +1509,7 @@ abstract-declarator:
 direct-abstract-declarator:
 	identifier-opt
 	( abstract-declarator )
-	direct-abstract-declarator [ type-specifier ]
+	direct-abstract-declarator [ unary-expression ]
 	direct-abstract-declarator [ constant-expression ]
 	direct-abstract-declarator [ ]
 
