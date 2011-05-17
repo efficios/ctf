@@ -193,6 +193,8 @@ TSDL meta-data representation:
     /* based used for pretty-printing output, default: decimal. */
     base = decimal OR dec OR OR d OR i OR u OR 10 OR hexadecimal OR hex OR x OR X OR p OR 16
            OR octal OR oct OR o OR 8 OR binary OR b OR 2;
+    /* character encoding, default: none */
+    encoding = none or UTF8 or ASCII;
   }
 
 Example of type inheritance (creation of a uint32_t named type):
@@ -210,6 +212,17 @@ typealias integer {
   signed = true;
   align = 1;
 } := int5_t;
+
+The character encoding field can be used to specify that the integer
+must be printed as a text character when read. e.g.:
+
+typealias integer {
+  size = 8;
+  align = 8;
+  signed = false;
+  encoding = UTF8;
+} := utf_char;
+
 
 4.1.6 GNU/C bitfields
 
@@ -1539,8 +1552,8 @@ ctf-type-specifier:
 	string { ctf-assignment-expression-list-opt }
 
 ctf-assignment-expression-list:
-	ctf-assignment-expression
-	ctf-assignment-expression-list ; ctf-assignment-expression
+	ctf-assignment-expression ;
+	ctf-assignment-expression-list ctf-assignment-expression ;
 
 ctf-assignment-expression:
 	unary-expression assignment-operator unary-expression
