@@ -649,7 +649,7 @@ the fields typically expected (although these fields are each optional):
 
 struct event_packet_header {
   uint32_t magic;
-  uint8_t  trace_uuid[16];
+  uint8_t  uuid[16];
   uint32_t stream_id;
 };
 
@@ -661,8 +661,8 @@ trace {
 If the magic number is not present, tools such as "file" will have no
 mean to discover the file type.
 
-If the trace_uuid is not present, no validation that the meta-data
-actually corresponds to the stream is performed.
+If the uuid is not present, no validation that the meta-data actually
+corresponds to the stream is performed.
 
 If the stream_id packet header field is missing, the trace can only
 contain a single stream. Its "id" field can be left out, and its events
@@ -895,7 +895,7 @@ contains, exactly:
 
 struct metadata_packet_header {
   uint32_t magic;			/* 0x75D11D57 */
-  uint8_t  trace_uuid[16];		/* Unique Universal Identifier */
+  uint8_t  uuid[16];			/* Unique Universal Identifier */
   uint32_t checksum;			/* 0 if unused */
   uint32_t content_size;		/* in bits */
   uint32_t packet_size;			/* in bits */
@@ -1010,7 +1010,7 @@ trace {
   byte_order = be OR le;			/* Endianness (required) */
   packet.header := struct {
     uint32_t magic;
-    uint8_t  trace_uuid[16];
+    uint8_t  uuid[16];
     uint32_t stream_id;
   };
 };
