@@ -233,7 +233,7 @@ defined by the size of the type "unit_type".
 
 TSDL meta-data representation:
 
-  unit_type name:size:
+  unit_type name:size;
 
 As an example, the following structure declared in C compiled by GCC:
 
