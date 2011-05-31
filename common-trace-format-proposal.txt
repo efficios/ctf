@@ -1543,8 +1543,8 @@ ctf-specifier:
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
-	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list
 
 ctf-type-specifier:
 	floating_point { ctf-assignment-expression-list-opt }
