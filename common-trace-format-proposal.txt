@@ -1503,8 +1503,8 @@ enumerator-list:
 
 enumerator:
 	enumeration-constant
-	enumeration-constant = unary-expression
-	enumeration-constant = constant-expression-range
+	enumeration-constant assignment-operator unary-expression
+	enumeration-constant assignment-operator constant-expression-range
 
 type-qualifier:
 	const
