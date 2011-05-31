@@ -1550,6 +1550,7 @@ ctf-type-specifier:
 	floating_point { ctf-assignment-expression-list-opt }
 	integer { ctf-assignment-expression-list-opt }
 	string { ctf-assignment-expression-list-opt }
+	string
 
 ctf-assignment-expression-list:
 	ctf-assignment-expression ;
