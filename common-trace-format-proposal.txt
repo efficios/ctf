@@ -1468,8 +1468,8 @@ struct-or-variant-declaration-list:
 struct-or-variant-declaration:
 	specifier-qualifier-list struct-or-variant-declarator-list ;
 	declaration-specifiers-opt storage-class-specifier declaration-specifiers-opt declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list := declaration-specifiers abstract-declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list := declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list ;
 
 specifier-qualifier-list:
 	type-specifier specifier-qualifier-list-opt
@@ -1543,8 +1543,8 @@ ctf-specifier:
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
-	typealias declaration-specifiers abstract-declarator-list := declaration-specifiers abstract-declarator-list ;
-	typealias declaration-specifiers abstract-declarator-list := declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list ;
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list ;
 
 ctf-type-specifier:
 	floating_point { ctf-assignment-expression-list-opt }
@@ -1559,5 +1559,5 @@ ctf-assignment-expression:
 	unary-expression assignment-operator unary-expression
 	unary-expression type-assignment-operator type-specifier
 	declaration-specifiers-opt storage-class-specifier declaration-specifiers-opt declarator-list
-	typealias declaration-specifiers abstract-declarator-list := declaration-specifiers abstract-declarator-list
-	typealias declaration-specifiers abstract-declarator-list := declarator-list
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list
+	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list
