@@ -664,7 +664,7 @@ Event packet context (all fields are optional, specified by TSDL meta-data):
 
 - Event packet content size (in bytes).
 - Event packet size (in bytes, includes padding).
-- Event packet content checksum (optional). Checksum excludes the event packet
+- Event packet content checksum. Checksum excludes the event packet
   header.
 - Per-stream event packet sequence count (to deal with UDP packet loss). The
   number of significant sequence counter bits should also be present, so
