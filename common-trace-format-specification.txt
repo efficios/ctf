@@ -1,4 +1,4 @@
-Common Trace Format (CTF) Specification (v1.7)
+Common Trace Format (CTF) Specification (pre-v1.8)
 
 Mathieu Desnoyers, EfficiOS Inc.
 
@@ -662,8 +662,8 @@ Event packet header (all fields are optional, specified by TSDL meta-data):
 
 Event packet context (all fields are optional, specified by TSDL meta-data):
 
-- Event packet content size (in bytes).
-- Event packet size (in bytes, includes padding).
+- Event packet content size (in bits).
+- Event packet size (in bits, includes padding).
 - Event packet content checksum. Checksum excludes the event packet
   header.
 - Per-stream event packet sequence count (to deal with UDP packet loss). The
