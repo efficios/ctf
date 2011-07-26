@@ -1026,8 +1026,9 @@ event context to define a variant referring to the "id" field of the
 event header as selector.
 
 The target dynamic scope must be specified explicitly when referring to
-a field outside of the local static scope. The dynamic scope prefixes
-are thus:
+a field outside of the local static scope (a local static scope contains
+all fields present within the same scope, at the same nesting level).
+The dynamic scope prefixes are thus:
 
  - Trace Packet Header: <trace.packet.header. >,
  - Stream Packet Context: <stream.packet.context. >,
