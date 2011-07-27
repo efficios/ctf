@@ -94,8 +94,8 @@ The final output of the trace, after its generation and optional transport over
 the network, is expected to be either on permanent or temporary storage in a
 virtual file system. Because each event stream is appended to while a trace is
 being recorded, each is associated with a separate file for output.  Therefore,
-a stored trace can be represented as a directory containing at least one
-file per stream.
+a stored trace can be represented as a directory containing zero, one or
+more files per stream.
 
 Meta-data description associated with the trace contains information on
 trace event types expressed in the Trace Stream Description Language
