@@ -935,12 +935,14 @@ tracer.
 
 The text-only meta-data file is a plain-text TSDL description. This file
 must begin with the following characters to identify the file as a CTF
-TSDL text-based metadata file:
+TSDL text-based metadata file (without the double-quotes) :
 
-/* TSDL */
+"/* TSDL"
 
 These characters allow automated discovery of file type. They are
-interpreted as a comment by the TSDL metadata parser.
+interpreted as a the beginning of a comment by the TSDL metadata parser.
+The comment can be continued to contain extra commented characters
+before it is closed.
 
 The packet-based meta-data is made of "meta-data packets", which each
 start with a meta-data packet header. The packet-based meta-data
