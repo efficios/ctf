@@ -937,12 +937,17 @@ The text-only meta-data file is a plain-text TSDL description. This file
 must begin with the following characters to identify the file as a CTF
 TSDL text-based metadata file (without the double-quotes) :
 
-"/* TSDL"
+"/* CTF"
 
-These characters allow automated discovery of file type. They are
-interpreted as a the beginning of a comment by the TSDL metadata parser.
-The comment can be continued to contain extra commented characters
-before it is closed.
+It must be followed by a space, and the version of the specification
+followed by the CTF trace, e.g.:
+
+" 1.8"
+
+These characters allow automated discovery of file type and CTF
+specification version. They are interpreted as a the beginning of a
+comment by the TSDL metadata parser.  The comment can be continued to
+contain extra commented characters before it is closed.
 
 The packet-based meta-data is made of "meta-data packets", which each
 start with a meta-data packet header. The packet-based meta-data
@@ -967,6 +972,8 @@ struct metadata_packet_header {
   uint8_t  compression_scheme;		/* 0 if unused */
   uint8_t  encryption_scheme;		/* 0 if unused */
   uint8_t  checksum_scheme;		/* 0 if unused */
+  uint8_t  major;			/* CTF spec version major number */
+  uint8_t  minor;			/* CTF spec version minor number */
 };
 
 The packet-based meta-data can be converted to a text-only meta-data by
