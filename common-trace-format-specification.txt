@@ -415,8 +415,11 @@ struct example {
   uint64_t second_field_name;  /* Named type declared in the meta-data */
 };
 
-The fields are placed in a sequence next to each other. They each possess a
-field name, which is a unique identifier within the structure.
+The fields are placed in a sequence next to each other. They each
+possess a field name, which is a unique identifier within the structure.
+The identifier is not allowed to use any reserved keyword
+(see Section C.1.2). Replacing reserved keywords with
+underscore-prefixed field names is recommended.
 
 A nameless structure can be declared as a field type or as part of a typedef:
 
@@ -453,6 +456,11 @@ value for the specific instance of the variant. The alignment of the type
 containing the variant is independent of the variant alignment.  The size of the
 variant is the size as selected by the tag value for the specific instance of
 the variant.
+
+Each variant type selector possess a field name, which is a unique
+identifier within the variant. The identifier is not allowed to use any
+reserved keyword (see Section C.1.2). Replacing reserved keywords with
+underscore-prefixed field names is recommended.
 
 A named variant declaration followed by its definition within a structure
 declaration:
@@ -1045,9 +1053,8 @@ associated with a variant, and to lookup up the location of the length
 field associated with a sequence.
 
 Variants and sequences can refer to a tag field either using a relative
-path or an absolute path. The relative path starts with "." to ensure
-there are no conflicts with dynamic scope names. It is relative to the
-scope in which the variant or sequence performing the lookup is located.
+path or an absolute path. The relative path is relative to the scope in
+which the variant or sequence performing the lookup is located.
 Relative paths are only allowed to lookup within the same static scope,
 which includes its nested static scopes. Lookups targeting parent static
 scopes need to be performed with an absolute path.
@@ -1072,15 +1079,13 @@ The dynamic scope prefixes are thus:
 
 
 The target dynamic scope must be specified explicitly when referring to
-a field outside of the static scope (absolute scope reference).
-References to fields within the static scope (including local static
-scopes and nested static scopes) can be referenced by using a relative
-reference (starting with ".").
-
-As a matter of convenience, the leading "." in relative paths can be
-omitted. In case of conflict between relative and dynamic paths, the
-relative path is preferred. It is recommended to use the "." prefix for
-relative paths to ensure no path name conflict can occur.
+a field outside of the static scope (absolute scope reference). No
+conflict can occur between relative and dynamic paths, because the
+keywords "trace", "stream", and "event" are reserved, and thus
+not permitted as field names. It is recommended that field names
+clashing with CTF and C99 reserved keywords use an underscore prefix to
+eliminate the risk of generating a description containing an invalid
+field name.
 
 The information available in the dynamic scopes can be thought of as the
 current tracing context. At trace production, information about the
