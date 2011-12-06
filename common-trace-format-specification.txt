@@ -1129,9 +1129,11 @@ stream {
 };
 
 event {
-  name = event_name;
+  name = "event_name";
   id = value;			/* Numeric identifier within the stream */
   stream_id = stream_id;
+  loglevel.identifier = "loglevel_identifier";
+  loglevel.value = value;
   context := struct {
     ...
   };
