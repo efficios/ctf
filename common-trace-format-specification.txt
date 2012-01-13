@@ -1266,7 +1266,7 @@ clock[cycle_counter] {
 	freq = 1000000000;	       /* frequency, in Hz */
 	/* precision in seconds is: 1000 * (1/freq) */
 	precision = 1000;
-	/* clock value offset from Jan 01 1970 is: offset * (1/freq) */
+	/* clock value offset from Epoch is: offset * (1/freq) */
 	offset = 1326476837897235420;
 };
 
@@ -1277,9 +1277,10 @@ field. The "freq" field is the initial frequency of the clock, in Hz. If
 the "freq" field is not present, the frequency is assumed to be
 1000000000 (providing clock increment of 1 ns). The optional "precision"
 field details the uncertainty on the clock measurements, in (1/freq)
-units. The "offset" field indicates the offset from Jan 01 1970 to the
-zero of value of the clock, in (1/freq) units. If the "offset" field is
-not present, it is assigned the 0 value.
+units. The "offset" field indicates the offset from POSIX.1 Epoch,
+1970-01-01 00:00:00 +0000 (UTC), to the zero of value of the clock, in
+(1/freq) units. If the "offset" field is not present, it is assigned the
+0 value.
 
 Secondly, a reference to this clock should be added within an integer
 type:
