@@ -65,6 +65,7 @@ Table of Contents
        7.3.1 Lexical Scope
        7.3.2 Static and Dynamic Scopes
    7.4 TSDL Examples
+8. Clocks
 
 
 1. Preliminary definitions
@@ -1244,6 +1245,79 @@ struct {
 }
 
 
+8. Clocks
+
+Clock metadata allows to describe the clock topology of the system, as
+well as to detail each clock parameter. In absence of clock description,
+it is assumed that all fields named "timestamp" use the same clock
+source, which increment once per nanosecond.
+
+Describing a clock and how it is used by streams is threefold: first,
+the clock and clock topology should be described in a "clock"
+description block, e.g.:
+
+enum clocks {
+	cycle_counter,
+};
+
+clock[cycle_counter] {
+	uuid = "62189bee-96dc-11e0-91a8-cfa3d89f3923";
+	description = "Local CPU cycle counter";
+	freq = 1000000000;	       /* frequency, in Hz */
+	/* precision in seconds is: 1000 * (1/freq) */
+	precision = 1000;
+	/* clock value offset from Jan 01 1970 is: offset * (1/freq) */
+	offset = 1326476837897235420;
+};
+
+The optional field "uuid" is the unique identifier of the clock. It can
+be used to correlate different traces that use the same clock. An
+optional textual description string can be added with the "description"
+field. The "freq" field is the initial frequency of the clock, in Hz. If
+the "freq" field is not present, the frequency is assumed to be
+1000000000 (providing clock increment of 1 ns). The optional "precision"
+field details the uncertainty on the clock measurements, in (1/freq)
+units. The "offset" field indicates the offset from Jan 01 1970 to the
+zero of value of the clock, in (1/freq) units. If the "offset" field is
+not present, it is assigned the 0 value.
+
+Secondly, a reference to this clock should be added within an integer
+type:
+
+typealias integer {
+	size = 64; align = 1; signed = false;
+	map = clock[cycle_counter].value;
+} := uint64_ccnt_t;
+
+Thirdly, stream declarations can reference the clock they use as a
+time-stamp source:
+
+struct packet_context {
+	uint64_ccnt_t ccnt_begin;
+	uint64_ccnt_t ccnt_end;
+	/* ... */
+};
+
+stream {
+	/* ... */
+	event.header := struct {
+		uint64_ccnt_t timestamp;
+		/* ... */
+	}
+	packet.context := struct packet_context;
+};
+
+For a N-bit integer type referring to a clock, if the integer overflows
+compared to the N low order bits of the clock prior value, then it is
+assumed that one, and only one, overflow occurred. It is therefore
+important that events encoding time on a small number of bits happen
+frequently enough to detect when more than one N-bit overflow occurs.
+
+In a packet context, clock field names ending with "_begin" and "_end"
+have a special meaning: this refers to the time-stamps at, respectively,
+the beginning and the end of each packet.
+
+
 A. Helper macros
 
 The two following macros keep track of the size of a GNU/C structure without
@@ -1315,6 +1389,7 @@ keyword: is one of
 align
 const
 char
+clock
 double
 enum
 event
