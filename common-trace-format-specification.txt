@@ -1257,9 +1257,9 @@ the clock and clock topology should be described in a "clock"
 description block, e.g.:
 
 clock {
-	name = cycle_counter;
+	name = cycle_counter_sync;
 	uuid = "62189bee-96dc-11e0-91a8-cfa3d89f3923";
-	description = "Local CPU cycle counter";
+	description = "Cycle counter synchronized across CPUs";
 	freq = 1000000000;	       /* frequency, in Hz */
 	/* precision in seconds is: 1000 * (1/freq) */
 	precision = 1000;
@@ -1285,7 +1285,7 @@ type:
 
 typealias integer {
 	size = 64; align = 1; signed = false;
-	map = clock.cycle_counter.value;
+	map = clock.cycle_counter_sync.value;
 } := uint64_ccnt_t;
 
 Thirdly, stream declarations can reference the clock they use as a
