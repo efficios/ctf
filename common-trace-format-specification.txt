@@ -1256,13 +1256,8 @@ Describing a clock and how it is used by streams is threefold: first,
 the clock and clock topology should be described in a "clock"
 description block, e.g.:
 
-typealias integer { size = 32; align = 32; signed = true } := uint32_t;
-
-enum clocks : uint32_t {
-	cycle_counter,
-};
-
-clock[cycle_counter] {
+clock {
+	name = cycle_counter;
 	uuid = "62189bee-96dc-11e0-91a8-cfa3d89f3923";
 	description = "Local CPU cycle counter";
 	freq = 1000000000;	       /* frequency, in Hz */
@@ -1272,24 +1267,25 @@ clock[cycle_counter] {
 	offset = 1326476837897235420;
 };
 
-The optional field "uuid" is the unique identifier of the clock. It can
-be used to correlate different traces that use the same clock. An
-optional textual description string can be added with the "description"
-field. The "freq" field is the initial frequency of the clock, in Hz. If
-the "freq" field is not present, the frequency is assumed to be
-1000000000 (providing clock increment of 1 ns). The optional "precision"
-field details the uncertainty on the clock measurements, in (1/freq)
-units. The "offset" field indicates the offset from POSIX.1 Epoch,
-1970-01-01 00:00:00 +0000 (UTC), to the zero of value of the clock, in
-(1/freq) units. If the "offset" field is not present, it is assigned the
-0 value.
+The mandatory "name" field specifies the name of the clock identifier,
+which can later be used as a reference. The optional field "uuid" is the
+unique identifier of the clock. It can be used to correlate different
+traces that use the same clock. An optional textual description string
+can be added with the "description" field. The "freq" field is the
+initial frequency of the clock, in Hz. If the "freq" field is not
+present, the frequency is assumed to be 1000000000 (providing clock
+increment of 1 ns). The optional "precision" field details the
+uncertainty on the clock measurements, in (1/freq) units. The "offset"
+field indicates the offset from POSIX.1 Epoch, 1970-01-01 00:00:00 +0000
+(UTC), to the zero of value of the clock, in (1/freq) units. If the
+"offset" field is not present, it is assigned the 0 value.
 
 Secondly, a reference to this clock should be added within an integer
 type:
 
 typealias integer {
 	size = 64; align = 1; signed = false;
-	map = clock[cycle_counter].value;
+	map = clock.cycle_counter.value;
 } := uint64_ccnt_t;
 
 Thirdly, stream declarations can reference the clock they use as a
