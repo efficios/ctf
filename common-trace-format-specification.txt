@@ -1250,13 +1250,15 @@ struct {
 Clock metadata allows to describe the clock topology of the system, as
 well as to detail each clock parameter. In absence of clock description,
 it is assumed that all fields named "timestamp" use the same clock
-source, which increment once per nanosecond.
+source, which increments once per nanosecond.
 
 Describing a clock and how it is used by streams is threefold: first,
 the clock and clock topology should be described in a "clock"
 description block, e.g.:
 
-enum clocks {
+typealias integer { size = 32; align = 32; signed = true } := uint32_t;
+
+enum clocks : uint32_t {
 	cycle_counter,
 };
 
