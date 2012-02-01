@@ -420,7 +420,8 @@ The fields are placed in a sequence next to each other. They each
 possess a field name, which is a unique identifier within the structure.
 The identifier is not allowed to use any reserved keyword
 (see Section C.1.2). Replacing reserved keywords with
-underscore-prefixed field names is recommended.
+underscore-prefixed field names is recommended. Fields starting with an
+underscore should have their leading underscore removed by the CTF parser.
 
 A nameless structure can be declared as a field type or as part of a typedef:
 
@@ -461,7 +462,9 @@ the variant.
 Each variant type selector possess a field name, which is a unique
 identifier within the variant. The identifier is not allowed to use any
 reserved keyword (see Section C.1.2). Replacing reserved keywords with
-underscore-prefixed field names is recommended.
+underscore-prefixed field names is recommended. Fields starting with an
+underscore should have their leading underscore removed by the CTF parser.
+
 
 A named variant declaration followed by its definition within a structure
 declaration:
@@ -1085,7 +1088,9 @@ keywords "trace", "stream", and "event" are reserved, and thus
 not permitted as field names. It is recommended that field names
 clashing with CTF and C99 reserved keywords use an underscore prefix to
 eliminate the risk of generating a description containing an invalid
-field name.
+field name. Consequently, fields starting with an underscore should have
+their leading underscore removed by the CTF parser.
+
 
 The information available in the dynamic scopes can be thought of as the
 current tracing context. At trace production, information about the
