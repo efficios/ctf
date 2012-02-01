@@ -1029,14 +1029,14 @@ path lookups) and for sequence references to length fields.
 
 7.3.1 Lexical Scope
 
-Each of "trace", "stream", "event", "struct" and "variant" have their own
-nestable declaration scope, within which types can be declared using "typedef"
-and "typealias". A root declaration scope also contains all declarations
-located outside of any of the aforementioned declarations. An inner
-declaration scope can refer to type declared within its container
-lexical scope prior to the inner declaration scope. Redefinition of a
-typedef or typealias is not valid, although hiding an upper scope
-typedef or typealias is allowed within a sub-scope.
+Each of "trace", "env", "stream", "event", "struct" and "variant" have
+their own nestable declaration scope, within which types can be declared
+using "typedef" and "typealias". A root declaration scope also contains
+all declarations located outside of any of the aforementioned
+declarations. An inner declaration scope can refer to type declared
+within its container lexical scope prior to the inner declaration scope.
+Redefinition of a typedef or typealias is not valid, although hiding an
+upper scope typedef or typealias is allowed within a sub-scope.
 
 7.3.2 Static and Dynamic Scopes
 
@@ -1075,6 +1075,7 @@ header as selector.
 
 The dynamic scope prefixes are thus:
 
+ - Trace Environment: <env. >,
  - Trace Packet Header: <trace.packet.header. >,
  - Stream Packet Context: <stream.packet.context. >,
  - Event Header: <stream.event.header. >,
@@ -1121,6 +1122,16 @@ trace {
     uint8_t  uuid[16];
     uint32_t stream_id;
   };
+};
+
+/*
+ * The "env" (environment) scope contains assignment expressions. The
+ * field names and content are implementation-defined.
+ */
+env {
+  pid = value;			/* example */
+  proc_name = "name";		/* example */
+  ...
 };
 
 stream {
@@ -1409,6 +1420,7 @@ char
 clock
 double
 enum
+env
 event
 floating_point
 float
@@ -1723,6 +1735,7 @@ typedef-name:
 ctf-specifier:
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
+	env { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
 	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list
 	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list
