@@ -421,7 +421,8 @@ possess a field name, which is a unique identifier within the structure.
 The identifier is not allowed to use any reserved keyword
 (see Section C.1.2). Replacing reserved keywords with
 underscore-prefixed field names is recommended. Fields starting with an
-underscore should have their leading underscore removed by the CTF parser.
+underscore should have their leading underscore removed by the CTF trace
+readers.
 
 A nameless structure can be declared as a field type or as part of a typedef:
 
@@ -463,7 +464,8 @@ Each variant type selector possess a field name, which is a unique
 identifier within the variant. The identifier is not allowed to use any
 reserved keyword (see Section C.1.2). Replacing reserved keywords with
 underscore-prefixed field names is recommended. Fields starting with an
-underscore should have their leading underscore removed by the CTF parser.
+underscore should have their leading underscore removed by the CTF trace
+readers.
 
 
 A named variant declaration followed by its definition within a structure
@@ -1089,7 +1091,7 @@ not permitted as field names. It is recommended that field names
 clashing with CTF and C99 reserved keywords use an underscore prefix to
 eliminate the risk of generating a description containing an invalid
 field name. Consequently, fields starting with an underscore should have
-their leading underscore removed by the CTF parser.
+their leading underscore removed by the CTF trace readers.
 
 
 The information available in the dynamic scopes can be thought of as the
