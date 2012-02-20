@@ -1113,8 +1113,8 @@ trace. The event "id" field can be left out if there is only one event
 in a stream.
 
 trace {
-  major = value;				/* Trace format version */
-  minor = value;
+  major = value;			/* CTF spec version major number */
+  minor = value;			/* CTF spec version minor number */
   uuid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";	/* Trace UUID */
   byte_order = be OR le;			/* Endianness (required) */
   packet.header := struct {
