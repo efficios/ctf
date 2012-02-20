@@ -1,4 +1,4 @@
-Common Trace Format (CTF) Specification (pre-v1.8)
+Common Trace Format (CTF) Specification (v1.8)
 
 Mathieu Desnoyers, EfficiOS Inc.
 
