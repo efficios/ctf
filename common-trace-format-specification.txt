@@ -1732,6 +1732,7 @@ typedef-name:
 2.3) CTF-specific declarations
 
 ctf-specifier:
+	clock { ctf-assignment-expression-list-opt }
 	event { ctf-assignment-expression-list-opt }
 	stream { ctf-assignment-expression-list-opt }
 	env { ctf-assignment-expression-list-opt }
