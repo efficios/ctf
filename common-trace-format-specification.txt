@@ -358,7 +358,8 @@ enum name : integer_type {
 };
 
 If the values are omitted, the enumeration starts at 0 and increment of 1 for
-each entry:
+each entry. An entry with omitted value that follows a range entry takes
+as value the end_value of the previous range + 1:
 
 enum name : unsigned int {
   ZERO,
