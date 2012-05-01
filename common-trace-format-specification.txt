@@ -172,7 +172,7 @@ TSDL meta-data attribute representation of a specific alignment:
 
 4.1.3 Byte order
 
-By default, the native endianness of the source architecture the trace is used.
+By default, the native endianness of the source architecture is used.
 Byte order can be overridden for a basic type by specifying a "byte_order"
 attribute. Typical use-case is to specify the network byte order (big endian:
 "be") to save data captured from the network into the trace without conversion.
