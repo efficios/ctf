@@ -690,11 +690,15 @@ Event packet context (all fields are optional, specified by TSDL meta-data):
   include all event timestamps assigned to events contained within the packet.
 - Events discarded count
   - Snapshot of a per-stream free-running counter, counting the number of
-    events discarded that were supposed to be written in the stream prior to
-    the first event in the event packet.
-    * Note: producer-consumer buffer full condition should fill the current
+    events discarded that were supposed to be written in the stream after
+    the last event in the event packet.
+    * Note: producer-consumer buffer full condition can fill the current
             event packet with padding so we know exactly where events have been
-            discarded.
+	    discarded. However, if the buffer full condition chooses not
+	    to fill the current event packet with padding, all we know
+	    about the timestamp range in which the events have been
+	    discarded is that it is somewhere between the beginning and
+            the end of the packet.
 - Lossless compression scheme used for the event packet content. Applied
   directly to raw data. New types of compression can be added in following
   versions of the format.
