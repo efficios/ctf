@@ -994,7 +994,7 @@ struct metadata_packet_header {
 };
 
 The packet-based meta-data can be converted to a text-only meta-data by
-concatenating all the strings in contains.
+concatenating all the strings it contains.
 
 In the textual representation of the meta-data, the text contained
 within "/*" and "*/", as well as within "//" and end of line, are
