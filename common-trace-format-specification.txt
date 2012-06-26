@@ -454,11 +454,28 @@ type selector. The field to use as tag is specified by the "tag_field",
 specified between "< >" after the "variant" keyword for unnamed
 variants, and after "variant name" for named variants.
 
-The alignment of the variant is the alignment of the type as selected by the tag
-value for the specific instance of the variant. The alignment of the type
-containing the variant is independent of the variant alignment.  The size of the
-variant is the size as selected by the tag value for the specific instance of
-the variant.
+The alignment of the variant is the alignment of the type as selected by
+the tag value for the specific instance of the variant.  The size of the
+variant is the size as selected by the tag value for the specific
+instance of the variant.
+
+The alignment of the type containing the variant is independent of the
+variant alignment.  For instance, if a structure contains two fields, a
+32-bit integer, aligned on 32 bits, and a variant, which contains two
+choices: either a 32-bit field, aligned on 32 bits, or a 64-bit field,
+aligned on 64 bits, the alignment of the outmost structure will be
+32-bit (the alignment of its largest field, disregarding the alignment
+of the variant). The alignment of the variant will depend on the
+selector: if the variant's 32-bit field is selected, its alignment will
+be 32-bit, or 64-bit otherwise. It is important to note that variants
+are specifically tailored for compactness in a stream. Therefore, the
+relative offsets of compound type fields can vary depending on
+the offset at which the compound type starts if it contains a variant
+that itself contains a type with alignment larger than the largest field
+contained within the compound type. This is caused by the fact that the
+compound type may contain the enumeration that select the variant's
+choice, and therefore the alignment to be applied to the compound type
+cannot be determined before encountering the enumeration.
 
 Each variant type selector possess a field name, which is a unique
 identifier within the variant. The identifier is not allowed to use any
