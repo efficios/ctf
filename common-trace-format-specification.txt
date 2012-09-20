@@ -1173,6 +1173,7 @@ event {
   id = value;			/* Numeric identifier within the stream */
   stream_id = stream_id;
   loglevel = value;
+  model.emf.uri = "string";
   context := struct {
     ...
   };
