@@ -1182,6 +1182,13 @@ event {
   };
 };
 
+callsite {
+  name = "event_name";
+  func = "func_name";
+  file = "myfile.c";
+  line = 39;
+};
+
 /* More detail on types in section 4. Types */
 
 /*
@@ -1760,6 +1767,7 @@ ctf-specifier:
 	stream { ctf-assignment-expression-list-opt }
 	env { ctf-assignment-expression-list-opt }
 	trace { ctf-assignment-expression-list-opt }
+	callsite { ctf-assignment-expression-list-opt }
 	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declaration-specifiers abstract-declarator-list
 	typealias declaration-specifiers abstract-declarator-list type-assignment-operator declarator-list
 
