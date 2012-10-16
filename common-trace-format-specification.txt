@@ -1187,6 +1187,7 @@ callsite {
   func = "func_name";
   file = "myfile.c";
   line = 39;
+  ip = 0x40096c;
 };
 
 /* More detail on types in section 4. Types */
