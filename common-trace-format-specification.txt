@@ -604,7 +604,7 @@ Arrays are always aligned on their element alignment requirement.
 
 4.2.4 Sequences
 
-Sequences are dynamically-sized arrays. They refer to a a "length"
+Sequences are dynamically-sized arrays. They refer to a "length"
 unsigned integer field, which must appear in either the same static scope,
 prior to the sequence field (in field declaration order), in an upper
 static scope, or in an upper dynamic scope (see Section 7.3.2). This
