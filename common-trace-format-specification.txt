@@ -181,6 +181,11 @@ TSDL meta-data representation:
 
   byte_order = native OR network OR be OR le;	/* network and be are aliases */
 
+Even though the trace description section is not per se a type, for sake
+of clarity, it should be noted that native and network byte orders are
+only allowed within type declaration. The byte_order specified in the
+trace description section only accepts be OR le values.
+
 4.1.4 Size
 
 Type size, in bits, for integers and floats is that returned by "sizeof()" in C
