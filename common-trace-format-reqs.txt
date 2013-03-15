@@ -268,7 +268,7 @@ Enumerating these higher-level requirements influence the trace format in many
 ways. For instance, a requirement for compactness leads to schemes where all
 information repetition should be eliminated. Thus the need for optional
 per-section context information. Another example is the requirement for speed
-and streaming. The requirement for speed ans treaming leads to zero-copy
+and streaming. The requirement for speed and streaming leads to zero-copy
 implementations, which imply that the trace format should be written natively by
 the tracer.  The tracer requirements stated in this section are stated to ensure
 that the trace format structure makes it possible for a tracer to cope with the
