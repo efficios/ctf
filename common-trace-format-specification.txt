@@ -388,7 +388,7 @@ Enumerations omitting the container type ": integer_type" use the "int"
 type (for compatibility with C99). The "int" type must be previously
 declared. E.g.:
 
-typealias integer { size = 32; align = 32; signed = true } := int;
+typealias integer { size = 32; align = 32; signed = true; } := int;
 
 enum {
   ...
@@ -830,11 +830,11 @@ array is then set to 1.
 Types uintX_t represent an X-bit unsigned integer, as declared with
 either:
 
-  typealias integer { size = X; align = X; signed = false } := uintX_t;
+  typealias integer { size = X; align = X; signed = false; } := uintX_t;
 
     or
 
-  typealias integer { size = X; align = 1; signed = false } := uintX_t;
+  typealias integer { size = X; align = 1; signed = false; } := uintX_t;
 
 6.1.1 Type 1 - Few event IDs
 
