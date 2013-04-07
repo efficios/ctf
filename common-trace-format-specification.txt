@@ -165,6 +165,11 @@ by default. It is however recommended to always specify the alignment
 explicitly. Alignment values must be power of two. Compound types are
 aligned as specified in their individual specification.
 
+The base offset used for field alignment is the start of the packet
+containing the field. For instance, a field aligned on 32-bit needs to
+be at an offset multiple of 32-bit from the start of the packet that
+contains it.
+
 TSDL meta-data attribute representation of a specific alignment:
 
   align = value;                                /* value in bits */
@@ -682,8 +687,7 @@ Strings are always aligned on byte size.
 The event packet header consists of two parts: the "event packet header"
 is the same for all streams of a trace. The second part, the "event
 packet context", is described on a per-stream basis. Both are described
-in the TSDL meta-data. The packets are aligned on architecture-page-sized
-addresses.
+in the TSDL meta-data.
 
 Event packet header (all fields are optional, specified by TSDL meta-data):
 
