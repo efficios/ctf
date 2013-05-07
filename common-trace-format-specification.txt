@@ -54,7 +54,7 @@ Table of Contents
    6.1 Event Header
        6.1.1 Type 1 - Few event IDs
        6.1.2 Type 2 - Many event IDs
-   6.2 Event Context
+   6.2 Stream Event Context and Event Context
    6.3 Event Payload
        6.3.1 Padding
        6.3.2 Alignment
@@ -801,11 +801,10 @@ struct event_packet_context {
 
 The overall structure of an event is:
 
-1 - Stream Packet Context (as specified by the stream meta-data)
- 2 - Event Header (as specified by the stream meta-data)
-  3 - Stream Event Context (as specified by the stream meta-data)
-   4 - Event Context (as specified by the event meta-data)
-    5 - Event Payload (as specified by the event meta-data)
+1 - Event Header (as specified by the stream meta-data)
+ 2 - Stream Event Context (as specified by the stream meta-data)
+  3 - Event Context (as specified by the event meta-data)
+   4 - Event Payload (as specified by the event meta-data)
 
 This structure defines an implicit dynamic scoping, where variants
 located in inner structures (those with a higher number in the listing
@@ -896,7 +895,7 @@ struct event_header_2 {
 } align(16);	/* or align(8) */
 
 
-6.2 Event Context
+6.2 Stream Event Context and Event Context
 
 The event context contains information relative to the current event.
 The choice and meaning of this information is specified by the TSDL
