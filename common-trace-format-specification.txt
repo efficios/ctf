@@ -717,6 +717,7 @@ Event packet context (all fields are optional, specified by TSDL meta-data):
   while (or before) writing the first event and while (or after) writing the
   last event in the packet. The inclusive range between these timestamps should
   include all event timestamps assigned to events contained within the packet.
+  See Section 8. Clocks for more detail.
 - Events discarded count
   - Snapshot of a per-stream free-running counter, counting the number of
     events discarded that were supposed to be written in the stream after
@@ -838,6 +839,8 @@ either:
     or
 
   typealias integer { size = X; align = 1; signed = false; } := uintX_t;
+
+For more information about timestamp fields, see Section 8. Clocks.
 
 6.1.1 Type 1 - Few event IDs
 
@@ -1377,10 +1380,11 @@ stream {
 };
 
 For a N-bit integer type referring to a clock, if the integer overflows
-compared to the N low order bits of the clock prior value, then it is
-assumed that one, and only one, overflow occurred. It is therefore
-important that events encoding time on a small number of bits happen
-frequently enough to detect when more than one N-bit overflow occurs.
+compared to the N low order bits of the clock prior value found in the
+same stream, then it is assumed that one, and only one, overflow
+occurred. It is therefore important that events encoding time on a small
+number of bits happen frequently enough to detect when more than one
+N-bit overflow occurs.
 
 In a packet context, clock field names ending with "_begin" and "_end"
 have a special meaning: this refers to the time-stamps at, respectively,
