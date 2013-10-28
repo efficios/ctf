@@ -248,7 +248,7 @@ TSDL meta-data representation:
     size = value;                               /* value in bits, no default */
     align = value;                              /* value in bits */
     /* based used for pretty-printing output, default: decimal. */
-    base = decimal OR dec OR OR d OR i OR u OR 10 OR hexadecimal OR hex OR x OR X OR p OR 16
+    base = decimal OR dec OR d OR i OR u OR 10 OR hexadecimal OR hex OR x OR X OR p OR 16
            OR octal OR oct OR o OR 8 OR binary OR b OR 2;
     /* character encoding, default: none */
     encoding = none or UTF8 or ASCII;
