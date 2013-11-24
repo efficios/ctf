@@ -717,7 +717,11 @@ Event packet context (all fields are optional, specified by TSDL meta-data):
   while (or before) writing the first event and while (or after) writing the
   last event in the packet. The inclusive range between these timestamps should
   include all event timestamps assigned to events contained within the packet.
-  See Section 8. Clocks for more detail.
+  The timestamp at the beginning of an event packet is guaranteed to be
+  below or equal the timestamp at the end of that event packet.
+  The timestamp at the end of an event packet is guaranteed to be below
+  or equal the timestamps at the end of any following packet within the
+  same stream. See Section 8. Clocks for more detail.
 - Events discarded count
   - Snapshot of a per-stream free-running counter, counting the number of
     events discarded that were supposed to be written in the stream after
