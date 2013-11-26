@@ -41,12 +41,12 @@ Table of Contents
        4.1.6 GNU/C bitfields
        4.1.7 Floating point
        4.1.8 Enumerations
-4.2 Compound types
-    4.2.1 Structures
-    4.2.2 Variants (Discriminated/Tagged Unions)
-    4.2.3 Arrays
-    4.2.4 Sequences
-    4.2.5 Strings
+   4.2 Compound types
+       4.2.1 Structures
+       4.2.2 Variants (Discriminated/Tagged Unions)
+       4.2.3 Arrays
+       4.2.4 Sequences
+       4.2.5 Strings
 5. Event Packet Header
    5.1 Event Packet Header Description
    5.2 Event Packet Context Description
