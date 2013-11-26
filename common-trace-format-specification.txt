@@ -816,6 +816,12 @@ located in inner structures (those with a higher number in the listing
 above) can refer to the fields of outer structures (with lower number in
 the listing above). See Section 7.3 TSDL Scopes for more detail.
 
+The total length of an event is defined as the difference between the
+end of its Event Payload and the end of the previous event's Event
+Payload. Therefore, it includes the event header alignment padding, and
+all its fields and their respective alignment padding. Events of length
+0 are forbidden.
+
 6.1 Event Header
 
 Event headers can be described within the meta-data. We hereby propose, as an
