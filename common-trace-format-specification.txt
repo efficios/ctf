@@ -360,6 +360,7 @@ values to strings.  An enumeration from the C language can be represented in
 this format by having the same start_value and end_value for each element, which
 is in fact a range of size 1. This single-value range is supported without
 repeating the start and end values with the value = string declaration.
+Enumerations need to contain at least one entry.
 
 enum name : integer_type {
   somestring          = start_value1 ... end_value1,
