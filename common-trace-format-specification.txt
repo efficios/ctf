@@ -214,8 +214,9 @@ size (8-bit) correspond to the C99 standard integers. In addition,
 integers with alignment and/or size that are _not_ a multiple of the
 byte size are permitted; these correspond to the C99 standard bitfields,
 with the added specification that the CTF integer bitfields have a fixed
-binary representation. A MIT-licensed reference implementation of the
-CTF portable bitfields is available at:
+binary representation. Integer size needs to be a positive integer.
+Integers of size 0 are forbidden. A MIT-licensed reference
+implementation of the CTF portable bitfields is available at:
 
   http://git.efficios.com/?p=babeltrace.git;a=blob;f=include/babeltrace/bitfield.h
 
