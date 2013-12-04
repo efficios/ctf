@@ -468,9 +468,11 @@ by the mapping from the enumeration value to the string used as variant
 type selector. The field to use as tag is specified by the "tag_field",
 specified between "< >" after the "variant" keyword for unnamed
 variants, and after "variant name" for named variants. It is not
-required that each enumeration mapping appears as variant type tag field.
-However, it is required that any enumeration mapping encountered within a
-stream has a matching variant type tag field.
+required that each enumeration mapping appears as variant type tag
+field. It is also not required that each variant type tag appears as
+enumeration mapping. However, it is required that any enumeration
+mapping encountered within a stream has a matching variant type tag
+field.
 
 The alignment of the variant is the alignment of the type as selected by
 the tag value for the specific instance of the variant.  The size of the
