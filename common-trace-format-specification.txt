@@ -358,10 +358,10 @@ ranges (or single values) to strings. Instead of being limited to simple
 "value -> string" mappings, these enumerations map
 "[ start_value ... end_value ] -> string", which map inclusive ranges of
 values to strings.  An enumeration from the C language can be represented in
-this format by having the same start_value and end_value for each element, which
-is in fact a range of size 1. This single-value range is supported without
-repeating the start and end values with the value = string declaration.
-Enumerations need to contain at least one entry.
+this format by having the same start_value and end_value for each
+mapping, which is in fact a range of size 1. This single-value range is
+supported without repeating the start and end values with the value =
+string declaration.  Enumerations need to contain at least one entry.
 
 enum name : integer_type {
   somestring          = start_value1 ... end_value1,
@@ -462,12 +462,15 @@ A CTF variant is a selection between different types. A CTF variant must
 always be defined within the scope of a structure or within fields
 contained within a structure (defined recursively). A "tag" enumeration
 field must appear in either the same static scope, prior to the variant
-field (in field declaration order), in an upper static scope , or in an
+field (in field declaration order), in an upper static scope, or in an
 upper dynamic scope (see Section 7.3.2). The type selection is indicated
 by the mapping from the enumeration value to the string used as variant
 type selector. The field to use as tag is specified by the "tag_field",
 specified between "< >" after the "variant" keyword for unnamed
-variants, and after "variant name" for named variants.
+variants, and after "variant name" for named variants. It is not
+required that each enumeration mapping appears as variant type tag field.
+However, it is required that any enumeration mapping encountered within a
+stream has a matching variant type tag field.
 
 The alignment of the variant is the alignment of the type as selected by
 the tag value for the specific instance of the variant.  The size of the
