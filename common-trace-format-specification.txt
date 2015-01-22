@@ -942,7 +942,7 @@ header is selected. NR_FIELDS is the number of fields within the event (a
 numeric value).
 
   event {
-    context = struct {
+    context := struct {
       variant <id> {
         struct { } compact;
         struct {
@@ -1392,7 +1392,7 @@ stream {
 	event.header := struct {
 		uint64_ccnt_t timestamp;
 		/* ... */
-	}
+	};
 	packet.context := struct packet_context;
 };
 
