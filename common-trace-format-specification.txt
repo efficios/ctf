@@ -1,1 +1,0 @@
-common-trace-format-specification.md
