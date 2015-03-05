@@ -886,13 +886,13 @@ trace {
 };
 ~~~
 
-If the magic number is not present, tools such as `file` will have no
-mean to discover the file type.
+If the magic number (`magic` field) is not present,
+tools such as `file` will have no mean to discover the file type.
 
-If the uuid is not present, no validation that the metadata actually
-corresponds to the stream is performed.
+If the `uuid` field is not present, no validation that the metadata
+actually corresponds to the stream is performed.
 
-If the stream_id packet header field is missing, the trace can only
+If the `stream_id` packet header field is missing, the trace can only
 contain a single stream. Its `id` field can be left out, and its events
 don't need to declare a `stream_id` field.
 
