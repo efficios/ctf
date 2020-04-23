@@ -836,10 +836,12 @@ TSDL metadata):
     range between these timestamps should include all event timestamps
     assigned to events contained within the packet. The timestamp at the
     beginning of an event packet is guaranteed to be below or equal the
-    timestamp at the end of that event packet. The timestamp at the end
-    of an event packet is guaranteed to be below or equal the
-    timestamps at the end of any following packet within the same stream.
-    See [Clocks](#spec8) for more detail.
+    timestamp at the end of that event packet. The timestamp at the
+    beginning of an event packet is guaranteed to be above or equal the
+    timestamps at the beginning of any prior packet within the same
+    stream. The timestamp at the end of an event packet is guaranteed to
+    be below or equal the timestamps at the end of any following packet
+    within the same stream. See [Clocks](#spec8) for more detail.
   * **Events discarded count**. Snapshot of a per-stream
     free-running counter, counting the number of events discarded that
     were supposed to be written in the stream after the last event in
