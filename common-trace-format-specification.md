@@ -464,6 +464,9 @@ enum {
 }
 ~~~
 
+An enumeration field can have an integral value for which the associated
+enumeration type does not map to a string.
+
 ### 4.2 Compound types
 
 Compound are aggregation of type declarations. Compound types include
