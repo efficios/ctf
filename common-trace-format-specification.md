@@ -835,9 +835,9 @@ TSDL metadata):
     while (or after) writing the last event in the packet. The inclusive
     range between these timestamps should include all event timestamps
     assigned to events contained within the packet. The timestamp at the
-    beginning of an event packet is guaranteed to be below or equal the
-    timestamp at the end of that event packet. The timestamp at the
-    beginning of an event packet is guaranteed to be grater than or
+    beginning of an event packet is guaranteed to be less than or equal
+    to the timestamp at the end of that event packet. The timestamp at
+    the beginning of an event packet is guaranteed to be grater than or
     equal to timestamps at the beginning of any prior packet within the
     same stream. The timestamp at the end of an event packet is
     guaranteed to be less than or equal to the timestamps at the end of
