@@ -1545,11 +1545,11 @@ The `offset_s` and `offset` fields indicate the offset from
 POSIX.1 Epoch, 1970-01-01 00:00:00 +0000 (UTC), to the zero of value
 of the clock. The `offset_s` field is in seconds. The `offset` field is
 in (1/freq) units. If any of the `offset_s` or `offset` field is not
-present, it is assigned the 0 value. The field `absolute` is `TRUE` if
-the clock is a global reference across different clock UUID
-(e.g. NTP time). Otherwise, `absolute` is `FALSE`, and the clock can
-be considered as synchronized only with other clocks that have the same
-UUID.
+present, it is assigned the 0 value. Both `offset_s` and `offset`
+fields are signed integers. The field `absolute` is `TRUE` if the clock
+is a global reference across different clock UUID (e.g. NTP time).
+Otherwise, `absolute` is `FALSE`, and the clock can be considered as
+synchronized only with other clocks that have the same UUID.
 
 Secondly, a reference to this clock should be added within an integer
 type:
