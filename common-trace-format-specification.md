@@ -837,7 +837,7 @@ TSDL metadata):
     assigned to events contained within the packet. The timestamp at the
     beginning of an event packet is guaranteed to be less than or equal
     to the timestamp at the end of that event packet. The timestamp at
-    the beginning of an event packet is guaranteed to be grater than or
+    the beginning of an event packet is guaranteed to be greater than or
     equal to timestamps at the beginning of any prior packet within the
     same stream. The timestamp at the end of an event packet is
     guaranteed to be less than or equal to the timestamps at the end of
